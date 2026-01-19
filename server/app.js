@@ -12,7 +12,5 @@ app.get("/", (req, res) => {
   res.send("Welcome to the IP-RMT68 Portfolio Server!");
 });
 
-test;
-
 // Export the app for use in www.js
 module.exports = app;
