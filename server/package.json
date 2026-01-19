@@ -15,7 +15,9 @@
   "type": "commonjs",
   "main": "bin/www.js",
   "scripts": {
-    "test": "jest --watchAll --detectOpenHandles"
+    "test": "jest --watchAll --detectOpenHandles",
+    "dev": "node --watch bin/www.js",
+    "prod": "node bin/www.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
