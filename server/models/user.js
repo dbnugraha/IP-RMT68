@@ -17,12 +17,68 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
         unique: { msg: "Email address already in use!" },
+        validate: {
+          isEmail: {
+            msg: "Must be a valid email address",
+          },
+          notEmpty: {
+            msg: "Email cannot be empty",
+          },
+          notNull: {
+            msg: "Email is required",
+          },
+        },
       },
-      password: DataTypes.STRING,
-      firstName: DataTypes.STRING,
-      lastName: DataTypes.STRING,
-      phoneNumber: DataTypes.STRING,
-      address: DataTypes.STRING,
+      password: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      firstName: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: {
+            msg: "First name cannot be empty",
+          },
+          notNull: {
+            msg: "First name is required",
+          },
+        },
+      },
+      lastName: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      phoneNumber: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: {
+            msg: "Phone number cannot be empty",
+          },
+          notNull: {
+            msg: "Phone number is required",
+          },
+          validatePhoneNumber(value) {
+            const phoneRegex = /^\+?[1-9]\d{1,14}$/; // E.164 format
+            if (!phoneRegex.test(value)) {
+              throw new Error("Phone number is not valid");
+            }
+          },
+        },
+      },
+      address: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notEmpty: {
+            msg: "Address cannot be empty",
+          },
+          notNull: {
+            msg: "Address is required",
+          },
+        },
+      },
     },
     {
       sequelize,
