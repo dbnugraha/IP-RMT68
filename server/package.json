@@ -15,7 +15,7 @@
   "type": "commonjs",
   "main": "bin/www.js",
   "scripts": {
-    "test": "jest --watchAll --detectOpenHandles",
+    "test": "jest --runInBand --coverage --detectOpenHandles --forceExit",
     "dev": "node --watch bin/www.js",
     "prod": "node bin/www.js"
   },

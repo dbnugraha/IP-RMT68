@@ -1,38 +1,50 @@
 const { json } = require("sequelize");
 
 module.exports = (err, req, res, next) => {
-  console.error(err);
+  console.error(err.name, err?.errors, err.message);
 
-  const errorResponses = {
-    SequelizeValidationError: () => {
-      const messages = err.errors.map((e) => e.message);
-      return { statusCode: 400, message: messages };
-    },
-    SequelizeUniqueConstraintError: () => {
-      const messages = err.errors.map((e) => e.message);
-      return { statusCode: 400, message: messages };
-    },
-    UnauthorizedError: () => {
-      return { statusCode: 401, message: "Unauthorized" };
-    },
-    jsonwebtokenError: () => {
-      return { statusCode: 401, message: "Invalid Token" };
-    },
-    invalidTokenError: () => {
-      return { statusCode: 401, message: "Invalid Token" };
-    },
-    ForbiddenError: () => {
-      return { statusCode: 403, message: "Forbidden" };
-    },
-    NotFoundError: () => {
-      return { statusCode: 404, message: "Resource Not Found" };
-    },
-    default: () => {
-      return { statusCode: 500, message: "Internal Server Error" };
-    },
+  let errorResponse = {
+    statusCode: 500,
+    message: "Internal Server Error",
+    details: [],
   };
 
-  const errorResponse = (errorResponses[err.name] || errorResponses.default)();
+  switch (err.name) {
+    //400 Errors
+    case "SequelizeValidationError":
+      err.message = "Validation Error";
+      err.errors = err.errors.map((e) => ({ field: e.path, message: e.message }));
+    case "ValidationError":
+      errorResponse.statusCode = 400;
+      errorResponse.message = err.message || "Validation Error";
+      errorResponse.details = err.errors || [];
+      break;
+    //401 Errors
+    case "jsonWebTokenError":
+      err.message = "Invalid Token";
+    case "UnauthorizedError":
+      errorResponse.statusCode = 401;
+      errorResponse.message = err.message || "Unauthorized";
+      break;
+    //403 Errors
+    case "ForbiddenError":
+      errorResponse.statusCode = 403;
+      errorResponse.message = err.message || "Forbidden";
+      break;
+    //404 Errors
+    case "NotFoundError":
+      errorResponse.statusCode = 404;
+      errorResponse.message = err.message || "Resource Not Found";
+      break;
+    //409 Errors
+    case "SequelizeUniqueConstraintError":
+      err.errors = err.errors.map((e) => ({ field: e.path, message: e.message }));
+    case "EmailAlreadyExists":
+      errorResponse.statusCode = 409;
+      errorResponse.message = err.message || "Conflict";
+      errorResponse.details = err.errors || [];
+      break;
+  }
 
-  res.status(errorResponse.statusCode).json({ error: errorResponse.message });
+  return res.status(errorResponse.statusCode).json({ message: errorResponse.message, details: errorResponse.details });
 };
