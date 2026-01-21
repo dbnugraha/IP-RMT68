@@ -89,4 +89,37 @@ describe("Auth Routes Test", () => {
       expect(response.body).toHaveProperty("message", "Unauthorized");
     });
   });
+
+  describe("POST /google-login - google login", () => {
+    //success google login
+    test("200 Success google login - should return access token", async () => {
+      const { verifyGoogleToken } = require("../helpers/google");
+      const mockPayload = {
+        email: "test@example.com",
+        given_name: "Test",
+        family_name: "User",
+        picture: "https://placehold.co/64x64",
+      };
+      jest.spyOn(require("../helpers/google"), "verifyGoogleToken").mockResolvedValue(mockPayload);
+
+      const response = await request.post("/auth/google-login").send({ credential: "valid_google_token" });
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty("message", "Login successful");
+      expect(response.body).toHaveProperty("access_token", expect.any(String));
+      expect(response.body.access_token).not.toBe("");
+      const payload = require("../helpers/jwt").verifyToken(response.body.access_token);
+      expect(payload).toHaveProperty("id", expect.any(Number));
+      expect(payload).toHaveProperty("email", mockPayload.email);
+    });
+
+    //failed google login
+    test("400 Failed google login - should return validation error when credential is missing", async () => {
+      const response = await request.post("/auth/google-login").send({});
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty("message", "Validation Error");
+      expect(response.body.details).toEqual(
+        expect.arrayContaining([expect.objectContaining({ field: "credential", message: "Credential is required" })]),
+      );
+    });
+  });
 });

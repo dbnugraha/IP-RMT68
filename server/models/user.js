@@ -13,6 +13,10 @@ module.exports = (sequelize, DataTypes) => {
       return generateToken(payload);
     }
 
+    static async verifyCredential(credential) {
+      return await require("../helpers/google").verifyGoogleToken(credential);
+    }
+
     static associate(models) {
       User.hasMany(models.Business, { foreignKey: "UserId" });
     }
