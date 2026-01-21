@@ -93,14 +93,14 @@ describe("Auth Routes Test", () => {
   describe("POST /google-login - google login", () => {
     //success google login
     test("200 Success google login - should return access token", async () => {
-      const { verifyGoogleToken } = require("../helpers/google");
+      const { verifyGoogleToken } = require("../helpers/googleOauth");
       const mockPayload = {
         email: "test@example.com",
         given_name: "Test",
         family_name: "User",
         picture: "https://placehold.co/64x64",
       };
-      jest.spyOn(require("../helpers/google"), "verifyGoogleToken").mockResolvedValue(mockPayload);
+      jest.spyOn(require("../helpers/googleOauth"), "verifyGoogleToken").mockResolvedValue(mockPayload);
 
       const response = await request.post("/auth/google-login").send({ credential: "valid_google_token" });
       expect(response.status).toBe(200);

@@ -3,8 +3,15 @@ module.exports = class BusinessController {
   static async createBusiness(req, res, next) {
     try {
       const { id } = req.user;
-      const { name, description } = req.body;
-      const newBusiness = await Business.create({ name, description, UserId: id });
+      const { name, imageUrl, description, type, address } = req.body;
+      const newBusiness = await Business.create({
+        name,
+        imageUrl,
+        description,
+        type,
+        address,
+        UserId: id,
+      });
       res.status(201).json(newBusiness);
     } catch (error) {
       next(error);
@@ -48,14 +55,18 @@ module.exports = class BusinessController {
   static async updateBusiness(req, res, next) {
     try {
       const { businessId } = req.params;
-      const { name, description } = req.body;
+      const { name, imageUrl, description, type, address } = req.body;
       const business = await Business.findByPk(businessId);
       if (!business) {
         throw { name: "NotFoundError", message: "Business not found" };
       }
-      business.name = name || business.name;
-      business.description = description || business.description;
-      await business.save();
+      await business.update({
+        name,
+        imageUrl,
+        description,
+        type,
+        address,
+      });
       res.status(200).json(business);
     } catch (error) {
       next(error);

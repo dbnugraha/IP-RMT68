@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
     }
 
     static async verifyCredential(credential) {
-      return await require("../helpers/google").verifyGoogleToken(credential);
+      return await require("../helpers/googleOauth").verifyGoogleToken(credential);
     }
 
     static associate(models) {
