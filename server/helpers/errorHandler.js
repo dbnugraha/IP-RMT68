@@ -1,7 +1,12 @@
 const { json } = require("sequelize");
 
 module.exports = (err, req, res, next) => {
-  console.error(err.name, err?.errors, err.message);
+  console.error(
+    // err.name,
+    // err?.errors,
+    err.message,
+    // err
+  );
 
   let errorResponse = {
     statusCode: 500,
@@ -9,6 +14,10 @@ module.exports = (err, req, res, next) => {
     details: [],
   };
 
+  if (err.message.split(",")[0] === "Token used too late") {
+    err.name = "UnauthorizedError";
+    err.message = "Token has expired";
+  }
   switch (err.name) {
     //400 Errors
     case "SequelizeValidationError":

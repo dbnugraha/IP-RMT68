@@ -2,8 +2,7 @@
 const router = require("express").Router({ mergeParams: true });
 const ProductController = require("../controllers/ProductController");
 
-// All routes here are already under /:businessId from parent
-// businessAuthorization already ran, so we know user owns the business
+// routes /businesses/:businessId/products
 
 router.get("/", ProductController.getProductsByBusinessId);
 router.post("/", ProductController.createProduct);
