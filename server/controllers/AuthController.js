@@ -30,11 +30,11 @@ module.exports = class AuthController {
       }
 
       const user = await User.findOne({ where: { email } });
-      if (!user || !(await user.comparePassword(password))) {
+      if (!user || !(await user.checkPassword(password))) {
         throw { name: "UnauthorizedError" };
       }
 
-      const token = await user.generateToken({ id: user.id, email: user.email });
+      const token = user.generateToken({ id: user.id, email: user.email });
 
       res.status(200).json({ message: "Login successful", access_token: token });
     } catch (error) {
@@ -42,11 +42,11 @@ module.exports = class AuthController {
     }
   }
 
-  static async loginGoogle(req, res, next) {
-    try {
-      res.status(200).json();
-    } catch (error) {
-      next(error);
-    }
-  }
+  // static async loginGoogle(req, res, next) {
+  //   try {
+  //     res.status(200).json();
+  //   } catch (error) {
+  //     next(error);
+  //   }
+  // }
 };

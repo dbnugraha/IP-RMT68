@@ -9,11 +9,18 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
+      imageUrl: {
+        type: Sequelize.STRING,
+        defaultValue: "https://placehold.co/540x240",
+      },
       name: {
         type: Sequelize.STRING,
       },
       type: {
         type: Sequelize.STRING,
+      },
+      description: {
+        type: Sequelize.TEXT,
       },
       UserId: {
         type: Sequelize.INTEGER,

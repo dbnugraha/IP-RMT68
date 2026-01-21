@@ -11,22 +11,34 @@ module.exports = {
       },
       BusinessId: {
         type: Sequelize.INTEGER,
+        allowNull: false,
         references: {
           model: "Businesses",
           key: "id",
         },
       },
+      imageUrl: {
+        type: Sequelize.STRING,
+        defaultValue: "https://placehold.co/540x240",
+      },
       name: {
         type: Sequelize.STRING,
+        allowNull: false,
+      },
+      description: {
+        type: Sequelize.TEXT,
       },
       stockKeepingUnit: {
         type: Sequelize.STRING,
+        allowNull: false,
       },
       basePrice: {
         type: Sequelize.FLOAT,
+        allowNull: false,
       },
       sellingPrice: {
         type: Sequelize.FLOAT,
+        allowNull: false,
       },
       stock: {
         type: Sequelize.INTEGER,

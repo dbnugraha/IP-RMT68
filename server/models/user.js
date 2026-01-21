@@ -1,10 +1,16 @@
 "use strict";
 const { Model } = require("sequelize");
-const { hashPassword } = require("../helpers/bcrypt");
+const { comparePassword, hashPassword } = require("../helpers/bcrypt");
+const { generateToken } = require("../helpers/jwt");
+
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     async checkPassword(password) {
-      return await hashPassword.comparePassword(password, this.password);
+      return await comparePassword(password, this.password);
+    }
+
+    generateToken(payload) {
+      return generateToken(payload);
     }
 
     static associate(models) {
@@ -29,20 +35,21 @@ module.exports = (sequelize, DataTypes) => {
           },
         },
       },
+      imageUrl: {
+        type: DataTypes.STRING,
+        defaultValue: "https://placehold.co/64x64",
+      },
       password: {
         type: DataTypes.STRING,
-        allowNull: true,
       },
       firstName: {
         type: DataTypes.STRING,
-        allowNull: true,
       },
       lastName: {
         type: DataTypes.STRING,
       },
       phoneNumber: {
         type: DataTypes.STRING,
-        allowNull: true,
         validate: {
           isValidPhoneNumber(value) {
             if (!value) return;

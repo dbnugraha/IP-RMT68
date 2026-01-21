@@ -51,4 +51,42 @@ describe("Auth Routes Test", () => {
       );
     });
   });
+
+  describe("POST /login - user login", () => {
+    //success login
+    test("200 Success login - should return access token", async () => {
+      const response = await request.post("/auth/login").send(userData);
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty("message", "Login successful");
+      expect(response.body).toHaveProperty("access_token", expect.any(String));
+      expect(response.body.access_token).not.toBe("");
+      const payload = require("../helpers/jwt").verifyToken(response.body.access_token);
+      expect(payload).toHaveProperty("id", expect.any(Number));
+      expect(payload).toHaveProperty("email", userData.email);
+    });
+
+    //failed login
+    test("400 Failed login - should return validation error when email is missing", async () => {
+      const response = await request.post("/auth/login").send({ password: "password123" });
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty("message", "Validation Error");
+      expect(response.body.details).toEqual(
+        expect.arrayContaining([expect.objectContaining({ field: "email", message: "Email is required" })]),
+      );
+    });
+
+    test("400 Failed login - should return validation error when password is missing", async () => {
+      const response = await request.post("/auth/login").send({ email: "test@example.com" });
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty("message", "Validation Error");
+      expect(response.body.details).toEqual(
+        expect.arrayContaining([expect.objectContaining({ field: "password", message: "Password is required" })]),
+      );
+    });
+    test("401 Failed login - should return unauthorized error when credentials are invalid", async () => {
+      const response = await request.post("/auth/login").send({ email: "test@example.com", password: "wrongpassword" });
+      expect(response.status).toBe(401);
+      expect(response.body).toHaveProperty("message", "Unauthorized");
+    });
+  });
 });

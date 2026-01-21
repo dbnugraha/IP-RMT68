@@ -8,11 +8,14 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      Product.belongsTo(models.Business, { foreignKey: "BusinessId" });
     }
   }
   Product.init(
     {
+      BusinessId: {
+        type: DataTypes.INTEGER,
+      },
       name: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -24,6 +27,13 @@ module.exports = (sequelize, DataTypes) => {
             msg: "Product name is required",
           },
         },
+      },
+      imageUrl: {
+        type: DataTypes.STRING,
+        defaultValue: "https://placehold.co/540x240",
+      },
+      description: {
+        type: DataTypes.TEXT,
       },
       stockKeepingUnit: {
         type: DataTypes.STRING,

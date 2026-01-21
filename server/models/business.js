@@ -9,12 +9,19 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       Business.belongsTo(models.User, { foreignKey: "UserId" });
+      Business.hasMany(models.Transaction, { foreignKey: "BusinessId" });
     }
   }
   Business.init(
     {
       name: DataTypes.STRING,
+      imageUrl: {
+        type: DataTypes.STRING,
+        defaultValue: "https://placehold.co/540x240",
+      },
+      description: DataTypes.TEXT,
       type: DataTypes.STRING,
+      address: DataTypes.STRING,
       UserId: DataTypes.INTEGER,
     },
     {

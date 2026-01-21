@@ -2,36 +2,32 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("Users", {
+    await queryInterface.createTable("Transactions", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      imageUrl: {
-        type: Sequelize.STRING,
-        defaultValue: "https://placehold.co/64x64",
-      },
-      email: {
-        type: Sequelize.STRING,
+      BusinessId: {
+        type: Sequelize.INTEGER,
         allowNull: false,
-        unique: true,
+        references: {
+          model: "Businesses",
+          key: "id",
+        },
       },
-      password: {
-        type: Sequelize.STRING,
+      type: {
+        type: Sequelize.ENUM("income", "expense"),
       },
-      firstName: {
-        type: Sequelize.STRING,
+      totalAmount: {
+        type: Sequelize.FLOAT,
       },
-      lastName: {
-        type: Sequelize.STRING,
+      paymentMethod: {
+        type: Sequelize.ENUM("cash", "credit_card", "e_wallet"),
       },
-      phoneNumber: {
-        type: Sequelize.STRING,
-      },
-      address: {
-        type: Sequelize.STRING,
+      notes: {
+        type: Sequelize.TEXT,
       },
       createdAt: {
         allowNull: false,
@@ -44,6 +40,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("Users");
+    await queryInterface.dropTable("Transactions");
   },
 };
