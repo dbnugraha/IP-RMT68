@@ -29,5 +29,12 @@ module.exports = (sequelize, DataTypes) => {
       modelName: "Business",
     },
   );
+
+  Business.beforeCreate(async (business, options) => {
+    const count = await Business.count({ where: { UserId: business.UserId } });
+    if (count >= 3) {
+      throw { name: "BusinessLimitError", message: "User has reached the maximum number of businesses allowed." };
+    }
+  });
   return Business;
 };

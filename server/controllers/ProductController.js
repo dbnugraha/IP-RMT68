@@ -1,47 +1,7 @@
+// server/controllers/ProductController.js
 const { Product, Business } = require("../models");
 
 module.exports = class ProductController {
-  // GET all products
-  static async getAllProducts(req, res, next) {
-    try {
-      const products = await Product.findAll({
-        include: [
-          {
-            model: Business,
-            attributes: ["id", "name"],
-          },
-        ],
-        order: [["createdAt", "DESC"]],
-      });
-      res.status(200).json(products);
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  // GET product by ID
-  static async getProductById(req, res, next) {
-    try {
-      const { id } = req.params;
-      const product = await Product.findByPk(id, {
-        include: [
-          {
-            model: Business,
-            attributes: ["id", "name"],
-          },
-        ],
-      });
-
-      if (!product) {
-        throw { name: "NotFoundError", message: "Product not found" };
-      }
-
-      res.status(200).json(product);
-    } catch (error) {
-      next(error);
-    }
-  }
-
   // GET products by Business ID
   static async getProductsByBusinessId(req, res, next) {
     try {
@@ -62,14 +22,41 @@ module.exports = class ProductController {
     }
   }
 
+  // GET product by ID
+  static async getProductById(req, res, next) {
+    try {
+      const { businessId, id } = req.params;
+      const product = await Product.findOne({
+        where: {
+          id: id,
+          BusinessId: businessId, // Ensure product belongs to the business
+        },
+        include: [
+          {
+            model: Business,
+            attributes: ["id", "name"],
+          },
+        ],
+      });
+
+      if (!product) {
+        throw { name: "NotFoundError", message: "Product not found" };
+      }
+
+      res.status(200).json(product);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   // POST create new product
   static async createProduct(req, res, next) {
     try {
-      const { BusinessId, name, imageUrl, description, stockKeepingUnit, basePrice, sellingPrice, stock, isActive } =
-        req.body;
+      const { businessId } = req.params;
+      const { name, imageUrl, description, stockKeepingUnit, basePrice, sellingPrice, stock, isActive } = req.body;
 
       const newProduct = await Product.create({
-        BusinessId,
+        BusinessId: businessId, // Use businessId from route params
         name,
         imageUrl,
         description,
@@ -89,18 +76,21 @@ module.exports = class ProductController {
   // PUT/PATCH update product
   static async updateProduct(req, res, next) {
     try {
-      const { id } = req.params;
-      const { BusinessId, name, imageUrl, description, stockKeepingUnit, basePrice, sellingPrice, stock, isActive } =
-        req.body;
+      const { businessId, id } = req.params;
+      const { name, imageUrl, description, stockKeepingUnit, basePrice, sellingPrice, stock, isActive } = req.body;
 
-      const product = await Product.findByPk(id);
+      const product = await Product.findOne({
+        where: {
+          id: id,
+          BusinessId: businessId, // Ensure product belongs to the business
+        },
+      });
 
       if (!product) {
         throw { name: "NotFoundError", message: "Product not found" };
       }
 
       await product.update({
-        BusinessId,
         name,
         imageUrl,
         description,
@@ -120,10 +110,15 @@ module.exports = class ProductController {
   // PATCH update product stock
   static async updateProductStock(req, res, next) {
     try {
-      const { id } = req.params;
+      const { businessId, id } = req.params;
       const { stock } = req.body;
 
-      const product = await Product.findByPk(id);
+      const product = await Product.findOne({
+        where: {
+          id: id,
+          BusinessId: businessId,
+        },
+      });
 
       if (!product) {
         throw { name: "NotFoundError", message: "Product not found" };
@@ -140,9 +135,14 @@ module.exports = class ProductController {
   // PATCH toggle product active status
   static async toggleProductStatus(req, res, next) {
     try {
-      const { id } = req.params;
+      const { businessId, id } = req.params;
 
-      const product = await Product.findByPk(id);
+      const product = await Product.findOne({
+        where: {
+          id: id,
+          BusinessId: businessId,
+        },
+      });
 
       if (!product) {
         throw { name: "NotFoundError", message: "Product not found" };
@@ -159,9 +159,14 @@ module.exports = class ProductController {
   // DELETE product
   static async deleteProduct(req, res, next) {
     try {
-      const { id } = req.params;
+      const { businessId, id } = req.params;
 
-      const product = await Product.findByPk(id);
+      const product = await Product.findOne({
+        where: {
+          id: id,
+          BusinessId: businessId,
+        },
+      });
 
       if (!product) {
         throw { name: "NotFoundError", message: "Product not found" };

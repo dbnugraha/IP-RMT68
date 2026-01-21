@@ -11,4 +11,6 @@ router.get("/:businessId", BusinessController.fetchBusiness);
 router.put("/:businessId", BusinessController.updateBusiness);
 router.delete("/:businessId", BusinessController.deleteBusiness);
 
+router.use("/:businessId/products", require("./products"));
+
 module.exports = router;

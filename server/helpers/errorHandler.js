@@ -39,6 +39,7 @@ module.exports = (err, req, res, next) => {
     //409 Errors
     case "SequelizeUniqueConstraintError":
       err.errors = err.errors.map((e) => ({ field: e.path, message: e.message }));
+    case "BusinessLimitError":
     case "EmailAlreadyExists":
       errorResponse.statusCode = 409;
       errorResponse.message = err.message || "Conflict";
