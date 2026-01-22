@@ -1,9 +1,21 @@
+/* global google */
 import React, { useEffect } from "react";
+import http from "../helpers/http";
 
 export default function LoginPage() {
-  const handleCredentialResponse = (response) => {
-    // console.log("Encoded JWT ID token: " + response.credential);
-    console.log(response.credential);
+  const handleCredentialResponse = async (response) => {
+    try {
+      console.log("logging in");
+
+      const { data } = await http({
+        method: "POST",
+        url: "/auth/google-login",
+        data: { credential: response.credential },
+      });
+      localStorage.setItem("token", data.access_token);
+    } catch (error) {
+      console.log("Error:", error.response?.data || error.message);
+    }
   };
   useEffect(() => {
     google.accounts.id.initialize({
