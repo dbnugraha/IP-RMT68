@@ -36,9 +36,9 @@ async function gemini(model, prompt) {
  * @param {string} userPrompt - Optional custom prompt
  * @returns {Promise<string>} AI-generated insights
  */
-async function analyzeBusinessData(businessContext, userPrompt = "") {
+async function analyzeBusinessData(businessContext, userPrompt = "", language = "English") {
   const prompt = `
-As an expert business analyst AI. Analyze the following business data and provide actionable insights and recommendations.
+As an ${language} expert business analyst AI. Analyze the following business data and provide actionable insights and recommendations.
 
 BUSINESS INFORMATION:
 - Name: ${businessContext.business.name}
@@ -87,9 +87,9 @@ Format your response in a clear, structured manner using markdown.
  * @param {Object} metadata - Original business context metadata
  * @returns {Promise<Array>} Array of digestible insight cards
  */
-async function generateDigestibleSummary(fullInsights, metadata) {
+async function generateDigestibleSummary(fullInsights, metadata, language = "English") {
   const prompt = `
-As an expert business analyst AI you are tasked at summarizing business insights into actionable highlights.
+As an ${language} expert business analyst AI you are tasked at summarizing business insights into actionable highlights.
 
 Analyze the following comprehensive business insight and extract the MOST IMPORTANT 3-5 key points that a business owner needs to know immediately.
 
