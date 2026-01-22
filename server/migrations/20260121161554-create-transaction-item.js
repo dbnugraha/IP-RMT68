@@ -27,6 +27,9 @@ module.exports = {
       price: {
         type: Sequelize.FLOAT,
       },
+      type: {
+        type: Sequelize.ENUM("sale", "restock"),
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

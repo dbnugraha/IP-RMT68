@@ -12,5 +12,6 @@ router.delete("/:businessId", BusinessController.deleteBusiness);
 
 router.use("/:businessId/products", require("./products"));
 router.use("/:businessId/transactions", require("./transactions"));
+router.use("/:businessId/analytics", require("./analytics"));
 
 module.exports = router;

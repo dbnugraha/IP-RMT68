@@ -18,6 +18,7 @@ module.exports = (sequelize, DataTypes) => {
       ProductId: DataTypes.INTEGER,
       quantity: DataTypes.INTEGER,
       price: DataTypes.FLOAT,
+      type: DataTypes.ENUM("sale", "restock"),
     },
     {
       sequelize,
