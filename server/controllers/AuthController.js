@@ -31,7 +31,7 @@ module.exports = class AuthController {
 
       const user = await User.findOne({ where: { email } });
       if (!user || !(await user.checkPassword(password))) {
-        throw { name: "UnauthorizedError" };
+        throw { name: "UnauthorizedError", message: "Invalid email or password" };
       }
 
       const token = user.generateToken({ id: user.id, email: user.email });
