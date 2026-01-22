@@ -1,8 +1,9 @@
+// server/migrations/20260122000000-create-ai-insight.js
 "use strict";
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("Transactions", {
+    await queryInterface.createTable("AIInsights", {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -19,17 +20,20 @@ module.exports = {
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
-      type: {
-        type: Sequelize.ENUM("income", "expense"),
+      insightType: {
+        type: Sequelize.ENUM("daily", "weekly", "monthly", "custom"),
+        defaultValue: "daily",
       },
-      totalAmount: {
-        type: Sequelize.FLOAT,
-      },
-      paymentMethod: {
-        type: Sequelize.ENUM("cash", "credit_card", "e_wallet"),
-      },
-      notes: {
+      content: {
         type: Sequelize.TEXT,
+        allowNull: false,
+      },
+      metadata: {
+        type: Sequelize.JSONB,
+      },
+      generatedAt: {
+        type: Sequelize.DATE,
+        allowNull: false,
       },
       createdAt: {
         allowNull: false,
@@ -40,8 +44,13 @@ module.exports = {
         type: Sequelize.DATE,
       },
     });
+
+    // Add index for faster queries
+    await queryInterface.addIndex("AIInsights", ["BusinessId", "generatedAt"]);
+    await queryInterface.addIndex("AIInsights", ["insightType"]);
   },
+
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("Transactions");
+    await queryInterface.dropTable("AIInsights");
   },
 };

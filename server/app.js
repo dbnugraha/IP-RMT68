@@ -4,6 +4,9 @@ const cors = require("cors");
 const router = require("./routes/index");
 const errorHandler = require("./helpers/errorHandler");
 
+// Initialize jobs
+require("./jobs")();
+
 // Middleware
 app.use(cors());
 app.use(express.json());

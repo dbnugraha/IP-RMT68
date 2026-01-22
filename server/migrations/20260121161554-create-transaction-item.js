@@ -2,34 +2,33 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable("Transactions", {
+    await queryInterface.createTable("TransactionItems", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      BusinessId: {
+      TransactionId: {
         type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: "Businesses",
-          key: "id",
-        },
+        references: { model: "Transactions", key: "id" },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
-      type: {
-        type: Sequelize.ENUM("income", "expense"),
+      ProductId: {
+        type: Sequelize.INTEGER,
+        references: { model: "Products", key: "id" },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
       },
-      totalAmount: {
+      quantity: {
+        type: Sequelize.INTEGER,
+      },
+      price: {
         type: Sequelize.FLOAT,
       },
-      paymentMethod: {
-        type: Sequelize.ENUM("cash", "credit_card", "e_wallet"),
-      },
-      notes: {
-        type: Sequelize.TEXT,
+      type: {
+        type: Sequelize.ENUM("sale", "restock"),
       },
       createdAt: {
         allowNull: false,
@@ -42,6 +41,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable("Transactions");
+    await queryInterface.dropTable("TransactionItems");
   },
 };
