@@ -1,5 +1,8 @@
 // server/jobs/reportsJob.js
 const { sendEmail } = require("../helpers/nodemailer");
+const { marked } = require("marked");
+const DOMPurify = require("dompurify");
+const { JSDOM } = require("jsdom");
 
 /**
  * Send AI insight report via email
@@ -9,6 +12,11 @@ const { sendEmail } = require("../helpers/nodemailer");
  */
 async function sendInsightReport(business, insight) {
   try {
+    // Sanitize and convert markdown content to HTML
+    const window = new JSDOM("").window;
+    const purify = DOMPurify(window);
+    insight.content = purify.sanitize(marked(insight.content || ""));
+
     // Extract summary cards for easier email formatting
     const summaryCards = insight.summary?.insights || [];
 
@@ -17,229 +25,190 @@ async function sendInsightReport(business, insight) {
 <!DOCTYPE html>
 <html>
 <head>
-  <style>
-    :root {
-        /* Material UI Dark Palette */
-        --mui-bg-default: #121212;
-        --mui-bg-paper: #1e1e1e;
-        --mui-bg-elevated: #232323;
-
-        --mui-divider: rgba(255, 255, 255, 0.12);
-
-        --mui-text-primary: rgba(255, 255, 255, 0.87);
-        --mui-text-secondary: rgba(255, 255, 255, 0.6);
-        --mui-text-disabled: rgba(255, 255, 255, 0.38);
-
-        --mui-primary: #90caf9;
-        --mui-primary-main: #1976d2;
-        --mui-success: #66bb6a;
-        --mui-warning: #ffa726;
-        --mui-error: #f44336;
-        --mui-info: #29b6f6;
-    }
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!--[if !mso]><!-->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <!--<![endif]-->
+  <style type="text/css">
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600&display=swap');
+    
     body {
-        font-family: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI",
-        Helvetica, Arial, sans-serif;
-        background-color: var(--mui-bg-default);
-        color: var(--mui-text-primary);
-        max-width: 900px;
-        margin: 0 auto;
-        padding: 32px 20px;
-        line-height: 1.5;
+      margin: 0;
+      padding: 0;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
     }
-
-    /* Header */
-    .header {
-        background: var(--mui-bg-paper);
-        border: 1px solid var(--mui-divider);
-        border-radius: 8px;
-        padding: 24px;
-        margin-bottom: 32px;
+    
+    table {
+      border-collapse: collapse;
+      mso-table-lspace: 0pt;
+      mso-table-rspace: 0pt;
     }
-
-    .header h1 {
-        font-size: 1.75rem;
-        font-weight: 500;
-        margin: 0 0 8px;
+    
+    img {
+      border: 0;
+      height: auto;
+      line-height: 100%;
+      outline: none;
+      text-decoration: none;
+      -ms-interpolation-mode: bicubic;
     }
-
-    .header p {
-        margin: 0;
-        color: var(--mui-text-secondary);
-        font-size: 0.95rem;
-    }
-
-    /* Insight Cards (Paper) */
-    .insight-card {
-        background: var(--mui-bg-paper);
-        border: 1px solid var(--mui-divider);
-        border-radius: 8px;
-        padding: 16px 20px;
-        margin-bottom: 16px;
-    }
-
-    .insight-card.high {
-        border-left: 4px solid var(--mui-error);
-    }
-
-    .insight-card.medium {
-        border-left: 4px solid var(--mui-warning);
-    }
-
-    .insight-card.low {
-        border-left: 4px solid var(--mui-success);
-    }
-
-    .insight-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 8px;
-    }
-
-    /* Chip */
-    .insight-type {
-        font-size: 0.6875rem;
-        font-weight: 500;
-        letter-spacing: 0.04em;
-        text-transform: uppercase;
-        padding: 4px 10px;
-        border-radius: 16px;
-        background: rgba(255, 255, 255, 0.08);
-        color: var(--mui-text-secondary);
-    }
-
-    .type-financial { color: var(--mui-primary); }
-    .type-inventory { color: var(--mui-warning); }
-    .type-product { color: #ce93d8; }
-    .type-operations { color: var(--mui-success); }
-    .type-growth { color: #f48fb1; }
-    .type-alert { color: var(--mui-error); }
-
-    /* Values */
-    .insight-value {
-        font-size: 1.75rem;
-        font-weight: 500;
-        color: var(--mui-primary);
-        margin: 8px 0;
-    }
-
-    .insight-message {
-        font-size: 0.95rem;
-        color: var(--mui-text-primary);
-        margin-bottom: 12px;
-    }
-
-    /* Action Box */
-    .insight-action {
-        background: var(--mui-bg-elevated);
-        border: 1px solid var(--mui-divider);
-        border-radius: 6px;
-        padding: 12px 14px;
-        font-size: 0.875rem;
-        color: var(--mui-text-secondary);
-    }
-
-    .insight-action strong {
-        color: var(--mui-primary);
-        font-weight: 500;
-    }
-
-    /* Full Report */
-    .full-report {
-        background: var(--mui-bg-paper);
-        border: 1px solid var(--mui-divider);
-        border-radius: 8px;
-        padding: 24px;
-        margin-top: 32px;
-    }
-
-    .full-report h2 {
-        font-size: 1.25rem;
-        font-weight: 500;
-        margin-top: 0;
-        color: var(--mui-primary);
-    }
-
-    /* Trend Chips */
-    .trend-indicator {
-        font-size: 0.75rem;
-        font-weight: 500;
-        padding: 4px 8px;
-        border-radius: 4px;
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid var(--mui-divider);
-    }
-
-    .trend-positive {
-        color: var(--mui-success);
-    }
-
-    .trend-negative {
-        color: var(--mui-error);
-    }
-
-    .trend-warning {
-        color: var(--mui-warning);
-    }
-
-    .trend-neutral {
-        color: var(--mui-text-disabled);
-    }
-
-    /* Footer */
-    .footer {
-        margin-top: 40px;
-        padding-top: 16px;
-        border-top: 1px solid var(--mui-divider);
-        text-align: center;
-        font-size: 0.75rem;
-        color: var(--mui-text-secondary);
-    }
-    </style>
+  </style>
 </head>
-<body>
-  <div class="header">
-    <h1>📊 ${business.name} - ${insight.insightType.charAt(0).toUpperCase() + insight.insightType.slice(1)} Insights</h1>
-    <p>Generated on ${new Date(insight.generatedAt).toLocaleString("en-US", { dateStyle: "full", timeStyle: "short" })}</p>
-  </div>
+<body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;">
+  <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f5f5f5;">
+    <tr>
+      <td style="padding: 20px 10px;">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 600px; margin: 0 auto;">
+          
+          <!-- Header -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; padding: 28px 24px; margin-bottom: 20px;">
+              <h1 style="margin: 0 0 8px; font-size: 24px; font-weight: 600; color: #ffffff; line-height: 1.3;">
+                📊 ${business.name} - ${insight.insightType.charAt(0).toUpperCase() + insight.insightType.slice(1)} Insights
+              </h1>
+              <p style="margin: 0; color: rgba(255, 255, 255, 0.9); font-size: 14px;">
+                Generated on ${new Date(insight.generatedAt).toLocaleString("en-US", { dateStyle: "full", timeStyle: "short" })}
+              </p>
+            </td>
+          </tr>
+          
+          <tr><td style="height: 24px;"></td></tr>
+          
+          <!-- Key Insights Title -->
+          <tr>
+            <td>
+              <h2 style="margin: 0 0 16px; font-size: 20px; font-weight: 600; color: #333333;">🔍 Key Insights</h2>
+            </td>
+          </tr>
+          
+          <!-- Insight Cards -->
+          ${summaryCards
+            .map((card) => {
+              const borderColor =
+                card.priority === "high" ? "#dc3545" : card.priority === "medium" ? "#ff9800" : "#28a745";
 
-  <h2 style="color: #667eea;">🔍 Key Insights</h2>
-  
-  ${summaryCards
-    .map(
-      (card) => `
-    <div class="insight-card ${card.priority}">
-      <div class="insight-header">
-        <span class="insight-type type-${card.type}">${card.type}</span>
-        <span class="trend-indicator trend-${card.trend}">
-          ${card.trend === "positive" ? "📈" : card.trend === "negative" ? "📉" : card.trend === "warning" ? "⚠️" : "➡️"} 
-          ${card.trend}
-        </span>
-      </div>
-      
-      ${card.value ? `<div class="insight-value">${card.value}</div>` : ""}
-      
-      <div class="insight-message">${card.message}</div>
-      
-      <div class="insight-action">
-        <strong>💡 Action:</strong> ${card.action}
-      </div>
-    </div>
-  `,
-    )
-    .join("")}
+              const trendEmoji =
+                card.trend === "positive"
+                  ? "📈"
+                  : card.trend === "negative"
+                    ? "📉"
+                    : card.trend === "warning"
+                      ? "⚠️"
+                      : "➡️";
 
-  <div class="full-report">
-    <h2>📋 Detailed Analysis</h2>
-    ${insight.content.replace(/\n/g, "<br>")}
-  </div>
+              const trendColor =
+                card.trend === "positive"
+                  ? "#28a745"
+                  : card.trend === "negative"
+                    ? "#dc3545"
+                    : card.trend === "warning"
+                      ? "#ff9800"
+                      : "#6c757d";
 
-  <div class="footer">
-    <p>This is an automated report generated by your Business Intelligence System.</p>
-    <p>To view more details, please log in to your dashboard.</p>
-  </div>
+              const typeColor =
+                card.type === "financial"
+                  ? "#1976d2"
+                  : card.type === "inventory"
+                    ? "#ff9800"
+                    : card.type === "product"
+                      ? "#9c27b0"
+                      : card.type === "operations"
+                        ? "#28a745"
+                        : card.type === "growth"
+                          ? "#e91e63"
+                          : card.type === "alert"
+                            ? "#dc3545"
+                            : "#6c757d";
+
+              return `
+          <tr>
+            <td style="background-color: #ffffff; border: 1px solid #e0e0e0; border-left: 4px solid ${borderColor}; border-radius: 8px; padding: 16px 20px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tr>
+                  <td>
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                      <tr>
+                        <td>
+                          <span style="display: inline-block; font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; padding: 5px 12px; border-radius: 12px; background-color: ${typeColor}; color: #ffffff;">
+                            ${card.type}
+                          </span>
+                        </td>
+                        <td align="right">
+                          <span style="display: inline-block; font-size: 12px; font-weight: 500; padding: 5px 10px; border-radius: 12px; background-color: #f8f9fa; border: 1px solid #e0e0e0; color: ${trendColor};">
+                            ${trendEmoji} ${card.trend}
+                          </span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                ${
+                  card.value
+                    ? `
+                <tr>
+                  <td style="padding-top: 12px;">
+                    <div style="font-size: 32px; font-weight: 600; color: #1976d2; margin: 8px 0;">
+                      ${card.value}
+                    </div>
+                  </td>
+                </tr>
+                `
+                    : ""
+                }
+                <tr>
+                  <td style="padding-top: 8px;">
+                    <div style="font-size: 15px; color: #333333; margin-bottom: 12px; line-height: 1.6;">
+                      ${card.message}
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <div style="background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 6px; padding: 12px 14px; font-size: 14px; color: #495057;">
+                      <strong style="color: #667eea; font-weight: 600;">💡 Action:</strong> ${card.action}
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr><td style="height: 16px;"></td></tr>
+                `;
+            })
+            .join("")}
+          
+          <!-- Full Report -->
+          <tr>
+            <td style="background-color: #ffffff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+              <h2 style="margin: 0 0 16px; font-size: 20px; font-weight: 600; color: #1976d2;">📋 Detailed Analysis</h2>
+              <div style="font-size: 15px; color: #333333; line-height: 1.7;">
+                ${insight.content.replace(/\n/g, "<br>")}
+              </div>
+            </td>
+          </tr>
+          
+          <tr><td style="height: 40px;"></td></tr>
+          
+          <!-- Footer -->
+          <tr>
+            <td style="border-top: 2px solid #e0e0e0; padding-top: 20px; text-align: center;">
+              <p style="margin: 0 0 8px; font-size: 13px; color: #6c757d;">
+                This is an automated report generated by your Business Intelligence System.
+              </p>
+              <p style="margin: 0; font-size: 13px; color: #6c757d;">
+                To view more details, please log in to your dashboard.
+              </p>
+            </td>
+          </tr>
+          
+          <tr><td style="height: 20px;"></td></tr>
+          
+        </table>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>
     `;

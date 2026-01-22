@@ -19,5 +19,5 @@ module.exports = async () => {
   scheduleDailyInsights(false, false); // Do not skip any days
   scheduleCleanupJob();
 
-  await testEmailSending();
+  // await testEmailSending();
 };

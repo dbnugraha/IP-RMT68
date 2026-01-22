@@ -1,7 +1,9 @@
-// server/helpers/aiInsights.js - Add summary generation
-const { Business, AIInsight } = require("../models");
+// Updated server/helpers/aiInsights.js
+// server/helpers/aiInsights.js - Add email sending capability
+const { Business, AIInsight, User } = require("../models");
 const analytics = require("./analytics");
 const { analyzeBusinessData, generateDigestibleSummary } = require("./gemini");
+const { sendInsightReport, sendBulkInsightReports } = require("../jobs/reportsJob");
 const { Op } = require("sequelize");
 
 module.exports = {
@@ -124,9 +126,10 @@ module.exports = {
   /**
    * Generate AI insights for all active businesses
    * @param {string} insightType - Type of insight to generate
+   * @param {boolean} sendEmail - Whether to send email reports
    * @returns {Promise<Object>} Generation summary
    */
-  async generateInsightsForAllBusinesses(insightType = "daily") {
+  async generateInsightsForAllBusinesses(insightType = "daily", sendEmail = false) {
     try {
       console.log(`\n🤖 Starting ${insightType} AI insights generation...`);
       console.log(`⏰ Started at: ${new Date().toLocaleString("id-ID")}\n`);
@@ -134,11 +137,17 @@ module.exports = {
       // Get all businesses
       const businesses = await Business.findAll({
         attributes: ["id", "name", "type", "description"],
+        include: [
+          {
+            model: User,
+            attributes: ["email", "firstName", "lastName"],
+          },
+        ],
       });
 
       if (businesses.length === 0) {
         console.log("⚠️  No businesses found");
-        return { success: 0, failed: 0, skipped: 0, total: 0 };
+        return { success: 0, failed: 0, skipped: 0, total: 0, emailsSent: 0, emailsFailed: 0 };
       }
 
       console.log(`📋 Found ${businesses.length} business(es) to process\n`);
@@ -146,6 +155,7 @@ module.exports = {
       let successCount = 0;
       let failCount = 0;
       let skippedCount = 0;
+      const insightsForEmail = [];
 
       for (const business of businesses) {
         try {
@@ -159,8 +169,13 @@ module.exports = {
             }
           }
 
-          await this.generateInsightForBusiness(business, insightType);
+          const insight = await this.generateInsightForBusiness(business, insightType);
           successCount++;
+
+          // Collect for email sending
+          if (sendEmail) {
+            insightsForEmail.push({ business, insight });
+          }
 
           // Add delay to avoid rate limiting (3 seconds for 2 AI calls)
           if (businesses.indexOf(business) < businesses.length - 1) {
@@ -173,12 +188,25 @@ module.exports = {
         }
       }
 
+      let emailResult = { success: 0, failed: 0, total: 0 };
+
+      // Send emails if enabled and there are insights to send
+      if (sendEmail && insightsForEmail.length > 0) {
+        console.log("\n📧 Sending email reports...");
+        emailResult = await sendBulkInsightReports(insightsForEmail);
+        console.log(`✅ Emails sent: ${emailResult.success}`);
+        console.log(`❌ Emails failed: ${emailResult.failed}`);
+      }
+
       console.log("\n" + "=".repeat(50));
       console.log(`✨ AI Insights Generation Complete`);
       console.log(`✅ Successful: ${successCount}`);
       console.log(`⏭️  Skipped: ${skippedCount}`);
       console.log(`❌ Failed: ${failCount}`);
       console.log(`📊 Total: ${businesses.length}`);
+      if (sendEmail) {
+        console.log(`📧 Emails Sent: ${emailResult.success}/${emailResult.total}`);
+      }
       console.log(`⏰ Finished at: ${new Date().toLocaleString("id-ID")}`);
       console.log("=".repeat(50) + "\n");
 
@@ -187,9 +215,123 @@ module.exports = {
         failed: failCount,
         skipped: skippedCount,
         total: businesses.length,
+        emailsSent: emailResult.success,
+        emailsFailed: emailResult.failed,
       };
     } catch (error) {
       console.error("❌ Critical error in AI insights generation:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Send email report for a specific insight
+   * @param {number} insightId - AIInsight ID
+   * @returns {Promise<Object>} Email sending result
+   */
+  async sendInsightEmail(insightId) {
+    try {
+      const insight = await AIInsight.findByPk(insightId);
+
+      if (!insight) {
+        throw new Error("Insight not found");
+      }
+
+      const business = await Business.findByPk(insight.BusinessId, {
+        include: [
+          {
+            model: User,
+            attributes: ["email", "firstName", "lastName"],
+          },
+        ],
+      });
+
+      if (!business) {
+        throw new Error("Business not found");
+      }
+
+      if (!business.User?.email) {
+        throw new Error("Business owner email not found");
+      }
+
+      console.log(`📧 Sending insight email for: ${business.name}`);
+      await sendInsightReport(business, insight);
+
+      return {
+        success: true,
+        email: business.User.email,
+        businessName: business.name,
+      };
+    } catch (error) {
+      console.error(`❌ Failed to send insight email:`, error.message);
+      throw error;
+    }
+  },
+
+  /**
+   * Send email reports for multiple businesses (latest insights)
+   * @param {Array<number>} businessIds - Array of business IDs (optional, all if not provided)
+   * @param {string} insightType - Type of insight to send
+   * @returns {Promise<Object>} Email sending summary
+   */
+  async sendBulkEmails(businessIds = null, insightType = "daily") {
+    try {
+      console.log(`\n📧 Preparing to send ${insightType} insight emails...`);
+
+      const whereClause = businessIds && businessIds.length > 0 ? { id: { [Op.in]: businessIds } } : {};
+
+      const businesses = await Business.findAll({
+        where: whereClause,
+        attributes: ["id", "name"],
+        include: [
+          {
+            model: User,
+            attributes: ["email", "firstName", "lastName"],
+          },
+        ],
+      });
+
+      if (businesses.length === 0) {
+        return { success: 0, failed: 0, total: 0, errors: [] };
+      }
+
+      const reports = [];
+      const errors = [];
+
+      for (const business of businesses) {
+        try {
+          const insight = await this.getLatestInsight(business.id, insightType);
+          if (insight && business.User?.email) {
+            reports.push({ business, insight });
+          } else {
+            errors.push({
+              businessId: business.id,
+              businessName: business.name,
+              reason: !insight ? "No insight found" : "No email address",
+            });
+          }
+        } catch (error) {
+          errors.push({
+            businessId: business.id,
+            businessName: business.name,
+            reason: error.message,
+          });
+        }
+      }
+
+      const emailResult = await sendBulkInsightReports(reports);
+
+      console.log(`\n📧 Email Sending Complete:`);
+      console.log(`✅ Success: ${emailResult.success}`);
+      console.log(`❌ Failed: ${emailResult.failed}`);
+      console.log(`📊 Total: ${emailResult.total}`);
+
+      return {
+        ...emailResult,
+        errors: errors,
+      };
+    } catch (error) {
+      console.error("❌ Error in bulk email sending:", error);
       throw error;
     }
   },

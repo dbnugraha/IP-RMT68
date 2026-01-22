@@ -131,6 +131,8 @@ Valid trends: positive, negative, neutral, warning
 Valid icons: trending-up, trending-down, alert-circle, package, dollar-sign, users, chart-bar, warning, check-circle
 
 Focus on the MOST CRITICAL insights that require immediate attention or highlight significant achievements.
+
+Make sure the user understands this are AI-generated summaries based on the full insights provided.
 `;
 
   const response = await gemini("gemini-3-flash-preview", prompt);

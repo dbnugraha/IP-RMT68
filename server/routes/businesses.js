@@ -2,7 +2,7 @@ const router = require("express").Router({ mergeParams: true });
 const BusinessController = require("../controllers/BusinessController");
 
 router.post("/", BusinessController.createBusiness);
-router.get("/", BusinessController.fetchAllBusinesses);
+// router.get("/", BusinessController.fetchAllBusinesses);
 router.get("/my", BusinessController.fetchMyBusinesses);
 
 router.use("/:businessId", require("../middlewares/businessAuthorization"));

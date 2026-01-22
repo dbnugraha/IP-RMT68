@@ -374,4 +374,62 @@ module.exports = class AIInsightsController {
       next(error);
     }
   }
+
+  /**
+   * POST /businesses/:businessId/insights/:id/send-email
+   * Manually send email for a specific insight
+   */
+  static async sendInsightEmail(req, res, next) {
+    try {
+      const { businessId, id } = req.params;
+
+      // Verify insight belongs to business
+      const insight = await AIInsight.findOne({
+        where: {
+          id: parseInt(id),
+          BusinessId: parseInt(businessId),
+        },
+      });
+
+      if (!insight) {
+        throw { name: "NotFoundError", message: "Insight not found" };
+      }
+
+      const result = await aiInsightsHelper.sendInsightEmail(parseInt(id));
+
+      res.status(200).json({
+        message: "Email sent successfully",
+        email: result.email,
+        businessName: result.businessName,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * POST /businesses/:businessId/insights/send-bulk-email
+   * Send email for latest insight to one or multiple businesses
+   */
+  static async sendBulkEmails(req, res, next) {
+    try {
+      const { businessId } = req.params;
+      const { type = "daily", businessIds } = req.body;
+
+      // If businessIds provided, use them; otherwise send to current business only
+      const targetBusinessIds = businessIds || [parseInt(businessId)];
+
+      const result = await aiInsightsHelper.sendBulkEmails(targetBusinessIds, type);
+
+      res.status(200).json({
+        message: "Bulk email sending completed",
+        sent: result.success,
+        failed: result.failed,
+        total: result.total,
+        errors: result.errors,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 };
