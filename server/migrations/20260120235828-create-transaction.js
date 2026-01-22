@@ -16,6 +16,8 @@ module.exports = {
           model: "Businesses",
           key: "id",
         },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
       },
       type: {
         type: Sequelize.ENUM("income", "expense"),

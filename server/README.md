@@ -1128,6 +1128,465 @@ Delete a specific insight.
 
 ---
 
+## AI Insights Routes
+**Base Path:** `/businesses/:businessId/insights`
+**Auth Required:** Yes (business owner only)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/` | Get all insights for a business |
+| GET | `/latest` | Get latest insight |
+| GET | `/summary` | Get latest insight summary |
+| GET | `/stats` | Get insight statistics |
+| GET | `/:id` | Get insight by ID |
+| GET | `/:id/summary` | Get summary for specific insight |
+| POST | `/generate` | Generate new insight |
+| POST | `/regenerate/:id` | Regenerate existing insight |
+| POST | `/:id/regenerate-summary` | Regenerate summary only |
+| POST | `/:id/send-email` | Send email for specific insight |
+| POST | `/send-bulk-email` | Send bulk email reports |
+| POST | `/cleanup` | Cleanup old insights |
+| DELETE | `/:id` | Delete insight |
+
+### GET /businesses/:businessId/insights
+Get all insights for a business with optional filters.
+
+**Query Parameters:**
+- `limit` (number, default: 10) - Maximum number of insights to return
+- `type` (string) - Filter by insight type (daily/weekly/monthly/custom)
+- `startDate` (string, ISO 8601) - Filter insights from this date
+- `endDate` (string, ISO 8601) - Filter insights until this date
+
+**Response:** `200 OK`
+```json
+{
+  "count": 10,
+  "data": [
+    {
+      "id": 1,
+      "insightType": "daily",
+      "content": "Full markdown analysis...",
+      "summary": {
+        "insights": [
+          {
+            "id": "1",
+            "icon": "trending-down",
+            "type": "financial",
+            "trend": "negative",
+            "value": "Rp -7.4M",
+            "message": "Net loss due to high operational expenses",
+            "action": "Audit operational overhead to reduce expenses by 5-10%",
+            "priority": "high"
+          }
+        ]
+      },
+      "generatedAt": "2026-01-22T07:00:00.000Z",
+      "createdAt": "2026-01-22T07:05:23.000Z"
+    }
+  ]
+}
+```
+
+---
+
+### GET /businesses/:businessId/insights/latest
+Get the most recent insight for a business.
+
+**Query Parameters:**
+- `type` (string, default: "daily") - Type of insight to retrieve
+
+**Response:** `200 OK`
+```json
+{
+  "id": 1,
+  "insightType": "daily",
+  "content": "Full markdown analysis...",
+  "summary": {
+    "insights": [...]
+  },
+  "generatedAt": "2026-01-22T07:00:00.000Z",
+  "metadata": {
+    "business": {...},
+    "financial": {...},
+    "topProducts": [...],
+    "inventory": {...}
+  }
+}
+```
+
+**Errors:**
+- `404` - No insights available yet
+
+---
+
+### GET /businesses/:businessId/insights/summary
+Get digestible summary of latest insight.
+
+**Query Parameters:**
+- `type` (string, default: "daily") - Type of insight
+
+**Response:** `200 OK`
+```json
+{
+  "insightId": 1,
+  "type": "daily",
+  "generatedAt": "2026-01-22T07:00:00.000Z",
+  "summary": {
+    "insights": [
+      {
+        "id": "1",
+        "icon": "trending-down",
+        "type": "financial",
+        "trend": "negative",
+        "value": "Rp -7.4M",
+        "message": "Net loss due to high operational expenses",
+        "action": "Audit operational overhead to reduce expenses by 5-10%",
+        "priority": "high"
+      },
+      {
+        "id": "2",
+        "icon": "package",
+        "type": "inventory",
+        "trend": "warning",
+        "value": "7 Items",
+        "message": "46% of products are low on stock",
+        "action": "Immediately restock top-performing items",
+        "priority": "high"
+      }
+    ]
+  }
+}
+```
+
+---
+
+### GET /businesses/:businessId/insights/stats
+Get statistics about insights for a business.
+
+**Response:** `200 OK`
+```json
+{
+  "total": 45,
+  "byType": {
+    "daily": 30,
+    "weekly": 10,
+    "monthly": 3,
+    "custom": 2
+  },
+  "latest": {
+    "id": 45,
+    "type": "daily",
+    "generatedAt": "2026-01-22T07:00:00.000Z"
+  }
+}
+```
+
+---
+
+### GET /businesses/:businessId/insights/:id
+Get a specific insight by ID.
+
+**Response:** `200 OK`
+```json
+{
+  "id": 1,
+  "insightType": "weekly",
+  "content": "Full markdown analysis...",
+  "generatedAt": "2026-01-20T07:00:00.000Z",
+  "metadata": {
+    "business": {...},
+    "financial": {...}
+  },
+  "createdAt": "2026-01-20T07:05:23.000Z"
+}
+```
+
+**Errors:**
+- `404` - Insight not found
+
+---
+
+### GET /businesses/:businessId/insights/:id/summary
+Get digestible summary for a specific insight.
+
+**Response:** `200 OK`
+```json
+{
+  "insightId": 1,
+  "type": "weekly",
+  "generatedAt": "2026-01-20T07:00:00.000Z",
+  "summary": {
+    "insights": [...]
+  }
+}
+```
+
+**Errors:**
+- `404` - Insight not found or summary not available
+
+---
+
+### POST /businesses/:businessId/insights/generate
+Manually generate a new AI insight for the business.
+
+**Request Body:**
+```json
+{
+  "type": "custom"
+}
+```
+
+**Response:** `201 Created`
+```json
+{
+  "message": "Insight generated successfully",
+  "insight": {
+    "id": 1,
+    "insightType": "custom",
+    "content": "Full analysis...",
+    "generatedAt": "2026-01-22T10:30:00.000Z",
+    "metadata": {...}
+  }
+}
+```
+
+**Errors:**
+- `400` - Invalid insight type
+- `200` - Daily insight already generated today (returns existing)
+
+**Note:** Valid types are: `daily`, `weekly`, `monthly`, `custom`
+
+---
+
+### POST /businesses/:businessId/insights/regenerate/:id
+Regenerate an existing insight (useful if AI response was poor).
+
+**Response:** `200 OK`
+```json
+{
+  "message": "Insight regenerated successfully",
+  "insight": {
+    "id": 2,
+    "insightType": "daily",
+    "content": "New analysis...",
+    "generatedAt": "2026-01-22T10:35:00.000Z",
+    "metadata": {...}
+  }
+}
+```
+
+**Errors:**
+- `404` - Original insight not found
+
+**Note:** This deletes the old insight and creates a new one with the same type.
+
+---
+
+### POST /businesses/:businessId/insights/:id/regenerate-summary
+Regenerate only the digestible summary for an existing insight.
+
+**Response:** `200 OK`
+```json
+{
+  "message": "Summary regenerated successfully",
+  "insightId": 1,
+  "summary": {
+    "insights": [...]
+  }
+}
+```
+
+**Errors:**
+- `404` - Insight not found
+
+---
+
+### POST /businesses/:businessId/insights/:id/send-email
+**NEW:** Manually send an email report for a specific insight.
+
+**Response:** `200 OK`
+```json
+{
+  "message": "Email sent successfully",
+  "email": "owner@example.com",
+  "businessName": "My Business"
+}
+```
+
+**Errors:**
+- `404` - Insight not found
+- `500` - Email sending failed (business owner email not found, SMTP error)
+
+**Note:** Email will be sent to the business owner's registered email address with a professionally formatted HTML report including key insights cards and detailed analysis.
+
+---
+
+### POST /businesses/:businessId/insights/send-bulk-email
+**NEW:** Send email reports for the latest insights to one or multiple businesses.
+
+**Request Body:**
+```json
+{
+  "type": "daily",
+  "businessIds": [1, 2, 3]
+}
+```
+
+**Parameters:**
+- `type` (string, default: "daily") - Type of insight to send
+- `businessIds` (array, optional) - Array of business IDs to send to. If not provided, only sends to the current business.
+
+**Response:** `200 OK`
+```json
+{
+  "message": "Bulk email sending completed",
+  "sent": 2,
+  "failed": 1,
+  "total": 3,
+  "errors": [
+    {
+      "businessId": 3,
+      "businessName": "Business Name",
+      "reason": "No email address"
+    }
+  ]
+}
+```
+
+**Errors:**
+- `401` - Unauthorized
+- `403` - Forbidden (not business owner)
+
+**Use Cases:**
+1. Send to current business only:
+```json
+{
+  "type": "weekly"
+}
+```
+
+2. Send to multiple businesses (admin feature):
+```json
+{
+  "type": "monthly",
+  "businessIds": [1, 2, 3, 4]
+}
+```
+
+**Note:** Emails include:
+- Professional Material UI light mode design
+- Key insights cards with priority levels
+- Trend indicators (positive/negative/warning)
+- Actionable recommendations
+- Detailed analysis section
+- Optimized for Gmail and major email clients
+
+---
+
+### POST /businesses/:businessId/insights/cleanup
+Manually cleanup old insights (admin feature).
+
+**Request Body:**
+```json
+{
+  "daysToKeep": 90
+}
+```
+
+**Response:** `200 OK`
+```json
+{
+  "message": "Cleaned up insights older than 90 days",
+  "deletedCount": 15
+}
+```
+
+**Errors:**
+- `400` - daysToKeep must be at least 30
+
+---
+
+### DELETE /businesses/:businessId/insights/:id
+Delete a specific insight.
+
+**Response:** `200 OK`
+```json
+{
+  "message": "Insight deleted successfully",
+  "deletedId": 1
+}
+```
+
+**Errors:**
+- `404` - Insight not found
+
+---
+
+## Email Report Features
+
+### Email Design
+- **Material UI Light Mode** - Clean, professional appearance
+- **Table-based Layout** - Ensures consistent rendering across email clients
+- **Gmail Optimized** - Tested for Gmail web, iOS, and Android
+- **Responsive** - Adapts to mobile and desktop clients
+
+### Email Content Structure
+1. **Header Section**
+   - Business name and insight type
+   - Generation date and time
+
+2. **Key Insights Cards**
+   - Visual priority indicators (high/medium/low)
+   - Type badges (financial, inventory, product, etc.)
+   - Trend indicators with emojis (📈📉⚠️➡️)
+   - Metric values when applicable
+   - Clear messages and actionable recommendations
+
+3. **Detailed Analysis**
+   - Full AI-generated markdown content
+   - Converted to HTML for email display
+
+4. **Footer**
+   - Automated report disclaimer
+   - Dashboard login reminder
+
+### Insight Card Types
+- **Financial** - Revenue, profit margins, expenses (🔵 Blue)
+- **Inventory** - Stock levels, restocking alerts (🟠 Orange)
+- **Product** - Product performance analysis (🟣 Purple)
+- **Operations** - Operational efficiency (🟢 Green)
+- **Growth** - Growth opportunities (🔴 Pink)
+- **Alert** - Urgent alerts (🔴 Red)
+
+### Priority Levels
+- **High** - Red left border, urgent action required
+- **Medium** - Orange left border, important but not urgent
+- **Low** - Green left border, informational
+
+---
+
+## Automated Email Schedule
+
+AI insights are automatically generated and emailed based on the following schedule:
+
+| Type | Schedule | Recipients |
+|------|----------|------------|
+| Daily | Every day at 7:00 AM (WIB) | All business owners |
+| Weekly | Every Monday at 7:00 AM (WIB) | All business owners |
+| Monthly | 1st of month at 7:00 AM (WIB) | All business owners |
+
+**Schedule Rules:**
+- Daily insights skip Mondays (weekly runs instead)
+- Daily insights skip 1st of month (monthly runs instead)
+- Weekly insights skip 1st of month if it falls on Monday
+
+**Email Delivery:**
+- 1 second delay between emails to avoid rate limiting
+- Failed emails are logged but don't stop the batch
+- Email status included in generation summary logs
+
+---
+
 ## Error Responses
 
 All endpoints may return these standard error responses:
@@ -1196,9 +1655,9 @@ All endpoints may return these standard error responses:
 - `e_wallet`
 
 ### Insight Types
-- `daily` - Generated daily at 6 AM
-- `weekly` - Generated every Monday at 7 AM
-- `monthly` - Generated 1st of month at 8 AM
+- `daily` - Generated daily at 7 AM (WIB)
+- `weekly` - Generated every Monday at 7 AM (WIB)
+- `monthly` - Generated 1st of month at 7 AM (WIB)
 - `custom` - Manually generated
 
 ### Insight Priority Levels
@@ -1207,10 +1666,10 @@ All endpoints may return these standard error responses:
 - `low` - Informational
 
 ### Insight Trends
-- `positive` - Good news/improvement
-- `negative` - Decline/concern
-- `neutral` - Stable/informational
-- `warning` - Alert/attention needed
+- `positive` - Good news/improvement 📈
+- `negative` - Decline/concern 📉
+- `warning` - Alert/attention needed ⚠️
+- `neutral` - Stable/informational ➡️
 
 ### Insight Categories
 - `financial` - Revenue, profit, expenses
@@ -1223,11 +1682,58 @@ All endpoints may return these standard error responses:
 ---
 
 ## Rate Limiting
-- AI insight generation: Automatically limited by cron schedule
-- Manual generation: No specific limit (use responsibly)
+- AI insight generation: Automatically limited by cron schedule (3 second delay between businesses)
+- Manual generation: No specific limit (use responsibly, AI API costs apply)
+- Email sending: 1 second delay between emails to prevent rate limiting
 
 ## Cron Job Schedule
-- Daily insights: Every day at 6:00 AM (Asia/Jakarta)
-- Weekly insights: Every Monday at 7:00 AM (Asia/Jakarta)
-- Monthly insights: 1st day of month at 8:00 AM (Asia/Jakarta)
-- Cleanup job: Every Sunday at 3:00 AM (Asia/Jakarta)
+- **Daily insights:** Every day at 7:00 AM (Asia/Jakarta)
+  - Skips Mondays and 1st of month
+  - Automatically sends emails
+- **Weekly insights:** Every Monday at 7:00 AM (Asia/Jakarta)
+  - Skips 1st of month if it falls on Monday
+  - Automatically sends emails
+- **Monthly insights:** 1st day of month at 7:00 AM (Asia/Jakarta)
+  - Automatically sends emails
+- **Cleanup job:** Every Sunday at 3:00 AM (Asia/Jakarta)
+  - Removes insights older than 90 days
+
+---
+
+## AI Insight Generation Details
+
+### Data Sources
+Insights are generated from:
+- Financial transactions (income/expenses)
+- Product performance metrics
+- Inventory levels
+- Profitability analysis
+- Payment method trends
+
+### AI Processing
+1. Data collection from business analytics
+2. Context preparation with business information
+3. Full analysis generation using Gemini AI
+4. Digestible summary extraction (3-5 key insights)
+5. Storage in database with metadata
+6. Optional email notification
+
+### Summary Card Generation
+Each insight summary contains 3-5 cards with:
+- Unique ID for tracking
+- Visual icon identifier
+- Category type and color coding
+- Trend direction with emoji
+- Optional metric value
+- Clear problem statement
+- Specific actionable recommendation
+- Priority level for triage
+
+### Best Practices
+- Run manual generation during off-peak hours
+- Use `custom` type for ad-hoc analysis
+- Review automated insights daily
+- Act on high-priority recommendations first
+- Keep insights for at least 90 days for trend analysis
+
+---

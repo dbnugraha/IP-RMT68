@@ -16,6 +16,8 @@ module.exports = {
           model: "Businesses",
           key: "id",
         },
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
       },
       imageUrl: {
         type: Sequelize.STRING,
