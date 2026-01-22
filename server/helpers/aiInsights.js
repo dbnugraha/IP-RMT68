@@ -47,11 +47,12 @@ module.exports = {
       const fullInsights = await analyzeBusinessData(
         aiContext,
         `Provide ${insightType} business insights, identify trends, and suggest actionable recommendations.`,
+        "Indonesian",
       );
 
       // Generate digestible summary
       console.log(`🔄 Generating digestible summary for: ${business.name}`);
-      const digestibleSummary = await generateDigestibleSummary(fullInsights, aiContext);
+      const digestibleSummary = await generateDigestibleSummary(fullInsights, aiContext, "Indonesian");
 
       console.log(digestibleSummary);
 
@@ -89,7 +90,7 @@ module.exports = {
       console.log(`🔄 Regenerating summary for insight ID: ${insightId}`);
 
       // Generate new summary from existing content and metadata
-      const digestibleSummary = await generateDigestibleSummary(insight.content, insight.metadata);
+      const digestibleSummary = await generateDigestibleSummary(insight.content, insight.metadata, "Indonesian");
 
       // Update insight with new summary
       await insight.update({ summary: digestibleSummary });

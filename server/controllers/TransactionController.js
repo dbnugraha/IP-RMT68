@@ -1,5 +1,5 @@
 // server/controllers/TransactionController.js
-const { Transaction, Business } = require("../models");
+const { Transaction, Business, TransactionItem, Product } = require("../models");
 
 module.exports = class TransactionController {
   // GET transactions by Business ID
@@ -35,6 +35,15 @@ module.exports = class TransactionController {
           {
             model: Business,
             attributes: ["id", "name"],
+          },
+          {
+            model: TransactionItem,
+            include: [
+              {
+                model: Product,
+                attributes: ["id", "name", "sellingPrice", "stockKeepingUnit"],
+              },
+            ],
           },
         ],
       });

@@ -235,38 +235,62 @@ module.exports = class ProductController {
         throw { name: "NotFoundError", message: "Product not found" };
       }
 
-      if (product.stock > 0) {
-        throw { name: "ForbiddenError", message: "Cannot delete product with remaining stock" };
-      }
-
-      if (product.isActive) {
-        throw { name: "ForbiddenError", message: "Cannot delete an active product" };
-      }
-
-      await product.destroy();
-
-      res.status(200).json({ message: "Product deleted successfully" });
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  static async softDeleteProduct(req, res, next) {
-    try {
-      const { businessId, id } = req.params;
-      const product = await Product.findOne({
-        where: {
-          id: id,
-          BusinessId: businessId,
-        },
+      // Check if product is involved in any transaction items
+      const transactionItemCount = await TransactionItem.count({
+        where: { ProductId: id },
       });
-      if (!product) {
-        throw { name: "NotFoundError", message: "Product not found" };
+
+      if (transactionItemCount > 0) {
+        // Has transaction history → SOFT DELETE
+        await product.update({
+          isDeleted: true,
+          isActive: false,
+        });
+
+        return res.status(200).json({
+          message: "Product archived (has transaction history)",
+          deletedType: "soft",
+          product,
+        });
+      } else {
+        // No transaction history → HARD DELETE
+        // But still check business rules
+        if (product.stock > 0) {
+          throw { name: "ForbiddenError", message: "Cannot delete product with remaining stock" };
+        }
+
+        if (product.isActive) {
+          throw { name: "ForbiddenError", message: "Cannot delete an active product" };
+        }
+
+        await product.destroy();
+
+        return res.status(200).json({
+          message: "Product permanently deleted",
+          deletedType: "hard",
+        });
       }
-      await product.update({ isDeleted: true });
-      res.status(200).json({ message: "Product soft deleted successfully" });
     } catch (error) {
       next(error);
     }
   }
+
+  // static async softDeleteProduct(req, res, next) {
+  //   try {
+  //     const { businessId, id } = req.params;
+  //     const product = await Product.findOne({
+  //       where: {
+  //         id: id,
+  //         BusinessId: businessId,
+  //       },
+  //     });
+  //     if (!product) {
+  //       throw { name: "NotFoundError", message: "Product not found" };
+  //     }
+  //     await product.update({ isDeleted: true });
+  //     res.status(200).json({ message: "Product soft deleted successfully" });
+  //   } catch (error) {
+  //     next(error);
+  //   }
+  // }
 };
