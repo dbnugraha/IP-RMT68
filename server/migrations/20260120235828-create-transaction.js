@@ -28,7 +28,7 @@ module.exports = {
         allowNull: false,
       },
       paymentMethod: {
-        type: Sequelize.ENUM("cash", "credit_card", "e_wallet"),
+        type: Sequelize.ENUM("cash", "credit_card", "e_wallet", "bank_transfer", "debit_card"),
         allowNull: false,
       },
       notes: {

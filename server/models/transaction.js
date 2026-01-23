@@ -53,15 +53,15 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
       paymentMethod: {
-        type: DataTypes.ENUM("cash", "credit_card", "e_wallet"),
+        type: DataTypes.ENUM("cash", "credit_card", "e_wallet", "bank_transfer", "debit_card"),
         allowNull: false,
         validate: {
           notNull: {
             msg: "Payment method is required",
           },
           isIn: {
-            args: [["cash", "credit_card", "e_wallet"]],
-            msg: "Payment method must be 'cash', 'credit_card', or 'e_wallet'",
+            args: [["cash", "credit_card", "e_wallet", "bank_transfer", "debit_card"]],
+            msg: "Payment method must be 'cash', 'credit_card', 'e_wallet', 'bank_transfer', or 'debit_card'",
           },
         },
       },

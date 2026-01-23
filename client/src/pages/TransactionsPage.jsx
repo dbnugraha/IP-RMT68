@@ -592,7 +592,7 @@ function TransactionFormModal({ transaction, onClose, onSubmit }) {
             >
               <option value="cash">Cash</option>
               <option value="bank_transfer">Bank Transfer</option>
-              <option value="e-wallet">E-Wallet</option>
+              <option value="e_wallet">E-Wallet</option>
               <option value="credit_card">Credit Card</option>
               <option value="debit_card">Debit Card</option>
             </select>
