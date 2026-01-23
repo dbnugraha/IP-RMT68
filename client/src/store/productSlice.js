@@ -243,12 +243,13 @@ const productSlice = createSlice({
       })
       .addCase(restockProductStock.fulfilled, (state, action) => {
         state.loading = false;
-        const index = state.products.findIndex((p) => p.id === action.payload.id);
+        const product = action.payload.product || action.payload;
+        const index = state.products.findIndex((p) => p.id === product.id);
         if (index !== -1) {
-          state.products[index].stock = action.payload.stock;
+          state.products[index].stock = product.stock;
         }
-        if (state.selectedProduct && state.selectedProduct.id === action.payload.id) {
-          state.selectedProduct.stock = action.payload.stock;
+        if (state.selectedProduct && state.selectedProduct.id === product.id) {
+          state.selectedProduct.stock = product.stock;
         }
         state.error = null;
       })
@@ -265,12 +266,13 @@ const productSlice = createSlice({
       })
       .addCase(deductStock.fulfilled, (state, action) => {
         state.loading = false;
-        const index = state.products.findIndex((p) => p.id === action.payload.id);
+        const product = action.payload.product || action.payload;
+        const index = state.products.findIndex((p) => p.id === product.id);
         if (index !== -1) {
-          state.products[index].stock = action.payload.stock;
+          state.products[index].stock = product.stock;
         }
-        if (state.selectedProduct && state.selectedProduct.id === action.payload.id) {
-          state.selectedProduct.stock = action.payload.stock;
+        if (state.selectedProduct && state.selectedProduct.id === product.id) {
+          state.selectedProduct.stock = product.stock;
         }
         state.error = null;
       })
