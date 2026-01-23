@@ -25,6 +25,8 @@ export const createNewBusiness = createAsyncThunk("business/create", async (busi
     const data = await businessService.createBusiness(businessData);
     return data;
   } catch (error) {
+    console.log(error.response?.data);
+
     return rejectWithValue(error.response?.data?.message || "Failed to create business");
   }
 });

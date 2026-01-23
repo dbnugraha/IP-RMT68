@@ -52,7 +52,9 @@ export const fetchProductById = async (businessId, productId) => {
  * @returns { id, name, stock, message }
  */
 export const restockProduct = async (businessId, productId, quantity) => {
-  const { data } = await http.post(`${BUSINESS_SERVICE_URL}/${businessId}/products/${productId}/restock`, { quantity });
+  const { data } = await http.patch(`${BUSINESS_SERVICE_URL}/${businessId}/products/${productId}/restock`, {
+    quantity,
+  });
   return data;
 };
 
@@ -61,7 +63,7 @@ export const restockProduct = async (businessId, productId, quantity) => {
  * @returns { id, name, stock, message }
  */
 export const deductProductStock = async (businessId, productId, quantity) => {
-  const { data } = await http.post(`${BUSINESS_SERVICE_URL}/${businessId}/products/${productId}/deduct-stock`, {
+  const { data } = await http.patch(`${BUSINESS_SERVICE_URL}/${businessId}/products/${productId}/deduct-stock`, {
     quantity,
   });
   return data;
@@ -72,6 +74,6 @@ export const deductProductStock = async (businessId, productId, quantity) => {
  * @returns { id, name, isActive }
  */
 export const toggleProductStatus = async (businessId, productId) => {
-  const { data } = await http.post(`${BUSINESS_SERVICE_URL}/${businessId}/products/${productId}/toggle-status`);
+  const { data } = await http.patch(`${BUSINESS_SERVICE_URL}/${businessId}/products/${productId}/toggle-status`);
   return data;
 };

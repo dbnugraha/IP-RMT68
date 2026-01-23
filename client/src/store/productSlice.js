@@ -247,7 +247,7 @@ const productSlice = createSlice({
         if (index !== -1) {
           state.products[index].stock = action.payload.stock;
         }
-        if (state.selectedProduct?.id === action.payload.id) {
+        if (state.selectedProduct && state.selectedProduct.id === action.payload.id) {
           state.selectedProduct.stock = action.payload.stock;
         }
         state.error = null;
@@ -269,7 +269,7 @@ const productSlice = createSlice({
         if (index !== -1) {
           state.products[index].stock = action.payload.stock;
         }
-        if (state.selectedProduct?.id === action.payload.id) {
+        if (state.selectedProduct && state.selectedProduct.id === action.payload.id) {
           state.selectedProduct.stock = action.payload.stock;
         }
         state.error = null;
@@ -291,7 +291,7 @@ const productSlice = createSlice({
         if (index !== -1) {
           state.products[index].isActive = action.payload.isActive;
         }
-        if (state.selectedProduct?.id === action.payload.id) {
+        if (state.selectedProduct && state.selectedProduct.id === action.payload.id) {
           state.selectedProduct.isActive = action.payload.isActive;
         }
         state.error = null;
