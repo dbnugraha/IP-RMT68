@@ -111,12 +111,13 @@ module.exports = class ProductController {
   static async restockProduct(req, res, next) {
     try {
       const { businessId, id } = req.params;
-      const { additionalStock, generateTransaction = false, paymentMethod = "cash" } = req.body;
+      const { quantity, generateTransaction = false, paymentMethod = "cash" } = req.body;
 
-      // Validate and parse additionalStock
-      const parsedAdditionalStock = parseInt(additionalStock);
-      if (isNaN(parsedAdditionalStock) || parsedAdditionalStock <= 0) {
-        throw { name: "ValidationError", message: "Additional stock must be a positive number" };
+      // Validate and parse quantity
+      const parsedQuantity = Number(quantity);
+
+      if (!quantity || isNaN(parsedQuantity) || parsedQuantity <= 0) {
+        throw { name: "ValidationError", message: "Quantity must be a positive number" };
       }
 
       const product = await Product.findOne({
@@ -129,7 +130,8 @@ module.exports = class ProductController {
       if (!product) {
         throw { name: "NotFoundError", message: "Product not found" };
       }
-      const newStock = product.stock + parsedAdditionalStock;
+
+      const newStock = product.stock + parsedQuantity;
       await product.update({ stock: newStock });
 
       // create Transaction after user restocks product
@@ -138,15 +140,15 @@ module.exports = class ProductController {
           BusinessId: businessId,
           type: "expense",
           paymentMethod: paymentMethod,
-          totalAmount: parsedAdditionalStock * product.sellingPrice,
-          notes: `Restocked ${parsedAdditionalStock} units of ${product.name}`,
+          totalAmount: parsedQuantity * product.basePrice,
+          notes: `Restocked ${parsedQuantity} units of ${product.name}`,
         });
 
         await TransactionItem.create({
           ProductId: product.id,
-          quantity: parsedAdditionalStock,
+          quantity: parsedQuantity,
           type: "restock",
-          price: product.sellingPrice,
+          price: product.basePrice,
           TransactionId: transaction.id,
         });
       }
@@ -161,21 +163,30 @@ module.exports = class ProductController {
     try {
       const { businessId, id } = req.params;
       const { quantity, generateTransaction = false, paymentMethod = "cash" } = req.body;
+
+      // Validate and parse quantity
+      const parsedQuantity = Number(quantity);
+
+      if (!quantity || isNaN(parsedQuantity) || parsedQuantity <= 0) {
+        throw { name: "ValidationError", message: "Quantity must be a positive number" };
+      }
+
       const product = await Product.findOne({
         where: {
           id: id,
           BusinessId: businessId,
         },
       });
-      console.log(product);
 
       if (!product) {
         throw { name: "NotFoundError", message: "Product not found" };
       }
-      if (product.stock < quantity) {
+
+      if (product.stock < parsedQuantity) {
         throw { name: "InsufficientStockError", message: "Not enough stock to deduct the requested quantity" };
       }
-      const newStock = product.stock - quantity;
+
+      const newStock = product.stock - parsedQuantity;
       await product.update({ stock: newStock });
 
       // create Transaction after user deducts stock
@@ -184,13 +195,13 @@ module.exports = class ProductController {
           BusinessId: businessId,
           type: "income",
           paymentMethod: paymentMethod,
-          totalAmount: quantity * product.sellingPrice,
-          notes: `Sold ${quantity} units of ${product.name}`,
+          totalAmount: parsedQuantity * product.sellingPrice,
+          notes: `Sold ${parsedQuantity} units of ${product.name}`,
         });
 
         await TransactionItem.create({
           ProductId: product.id,
-          quantity: quantity,
+          quantity: parsedQuantity,
           type: "sale",
           price: product.sellingPrice,
           TransactionId: transaction.id,
