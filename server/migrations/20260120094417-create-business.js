@@ -15,15 +15,19 @@ module.exports = {
       },
       name: {
         type: Sequelize.STRING,
+        allowNull: false,
       },
       type: {
         type: Sequelize.STRING,
+        allowNull: false,
       },
       description: {
         type: Sequelize.TEXT,
+        allowNull: false,
       },
       UserId: {
         type: Sequelize.INTEGER,
+        allowNull: false,
         references: {
           model: "Users",
           key: "id",
@@ -31,6 +35,7 @@ module.exports = {
       },
       address: {
         type: Sequelize.STRING,
+        allowNull: false,
       },
       createdAt: {
         allowNull: false,

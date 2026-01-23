@@ -14,15 +14,72 @@ module.exports = (sequelize, DataTypes) => {
   }
   Business.init(
     {
-      name: DataTypes.STRING,
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notNull: {
+            msg: "Name is required",
+          },
+          notEmpty: {
+            msg: "Name cannot be empty",
+          },
+        },
+      },
       imageUrl: {
         type: DataTypes.STRING,
         defaultValue: "https://placehold.co/540x240",
+        validate: {
+          isUrl: {
+            msg: "Image URL must be a valid URL",
+          },
+        },
       },
-      description: DataTypes.TEXT,
-      type: DataTypes.STRING,
-      address: DataTypes.STRING,
-      UserId: DataTypes.INTEGER,
+      description: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+        validate: {
+          notNull: {
+            msg: "Description is required",
+          },
+          notEmpty: {
+            msg: "Description cannot be empty",
+          },
+        },
+      },
+      type: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notNull: {
+            msg: "Business type is required",
+          },
+          notEmpty: {
+            msg: "Business type cannot be empty",
+          },
+        },
+      },
+      address: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notNull: {
+            msg: "Address is required",
+          },
+          notEmpty: {
+            msg: "Address cannot be empty",
+          },
+        },
+      },
+      UserId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        validate: {
+          notNull: {
+            msg: "User ID is required",
+          },
+        },
+      },
     },
     {
       sequelize,
