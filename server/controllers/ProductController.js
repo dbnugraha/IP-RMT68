@@ -112,6 +112,13 @@ module.exports = class ProductController {
     try {
       const { businessId, id } = req.params;
       const { additionalStock, generateTransaction = false, paymentMethod = "cash" } = req.body;
+
+      // Validate and parse additionalStock
+      const parsedAdditionalStock = parseInt(additionalStock);
+      if (isNaN(parsedAdditionalStock) || parsedAdditionalStock <= 0) {
+        throw { name: "ValidationError", message: "Additional stock must be a positive number" };
+      }
+
       const product = await Product.findOne({
         where: {
           id: id,
@@ -122,7 +129,7 @@ module.exports = class ProductController {
       if (!product) {
         throw { name: "NotFoundError", message: "Product not found" };
       }
-      const newStock = product.stock + additionalStock;
+      const newStock = product.stock + parsedAdditionalStock;
       await product.update({ stock: newStock });
 
       // create Transaction after user restocks product
@@ -131,13 +138,13 @@ module.exports = class ProductController {
           BusinessId: businessId,
           type: "expense",
           paymentMethod: paymentMethod,
-          totalAmount: additionalStock * product.sellingPrice,
-          notes: `Restocked ${additionalStock} units of ${product.name}`,
+          totalAmount: parsedAdditionalStock * product.sellingPrice,
+          notes: `Restocked ${parsedAdditionalStock} units of ${product.name}`,
         });
 
         await TransactionItem.create({
           ProductId: product.id,
-          quantity: additionalStock,
+          quantity: parsedAdditionalStock,
           type: "restock",
           price: product.sellingPrice,
           TransactionId: transaction.id,
@@ -160,6 +167,7 @@ module.exports = class ProductController {
           BusinessId: businessId,
         },
       });
+      console.log(product);
 
       if (!product) {
         throw { name: "NotFoundError", message: "Product not found" };
