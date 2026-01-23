@@ -1,12 +1,15 @@
 import React from "react";
 import { useNavigate, NavLink } from "react-router";
+import { useDispatch } from "react-redux";
+import { logout } from "../store/authSlice";
 import Logo from "./Logo";
 
 export default function BusinessSidebar({ business, businessId, isOpen, onClose }) {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
+    dispatch(logout());
     navigate("/login");
   };
 
@@ -14,7 +17,7 @@ export default function BusinessSidebar({ business, businessId, isOpen, onClose 
     <>
       {/* Sidebar */}
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 ${
+        className={`fixed lg:sticky inset-y-0 lg:top-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 lg:h-screen ${
           isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
@@ -88,7 +91,7 @@ export default function BusinessSidebar({ business, businessId, isOpen, onClose 
               <span className="font-medium">Transactions</span>
             </NavLink>
 
-            <NavLink
+            {/* <NavLink
               to={`/business/${businessId}/insights`}
               className={({ isActive }) =>
                 `flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
@@ -105,7 +108,7 @@ export default function BusinessSidebar({ business, businessId, isOpen, onClose 
                 />
               </svg>
               <span className="font-medium">AI Insights</span>
-            </NavLink>
+            </NavLink> */}
           </nav>
 
           {/* Sidebar Footer */}

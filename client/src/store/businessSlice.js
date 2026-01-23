@@ -7,7 +7,7 @@ export const fetchMyBusinesses = createAsyncThunk("business/fetchMy", async (_, 
     const data = await businessService.fetchMyBusiness();
     return data;
   } catch (error) {
-    return rejectWithValue(error.response?.data?.message || "Failed to fetch businesses");
+    return rejectWithValue(error.response?.data || { message: "Failed to fetch businesses" });
   }
 });
 
@@ -16,7 +16,7 @@ export const fetchBusinessById = createAsyncThunk("business/fetchById", async (b
     const data = await businessService.fetchBusinessById(businessId);
     return data;
   } catch (error) {
-    return rejectWithValue(error.response?.data?.message || "Failed to fetch business");
+    return rejectWithValue(error.response?.data || { message: "Failed to fetch business" });
   }
 });
 
@@ -25,9 +25,7 @@ export const createNewBusiness = createAsyncThunk("business/create", async (busi
     const data = await businessService.createBusiness(businessData);
     return data;
   } catch (error) {
-    console.log(error.response?.data);
-
-    return rejectWithValue(error.response?.data?.message || "Failed to create business");
+    return rejectWithValue(error.response?.data || { message: "Failed to create business" });
   }
 });
 
@@ -38,7 +36,7 @@ export const updateExistingBusiness = createAsyncThunk(
       const data = await businessService.updateBusiness(businessId, businessData);
       return data;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || "Failed to update business");
+      return rejectWithValue(error.response?.data || { message: "Failed to update business" });
     }
   },
 );
@@ -48,7 +46,7 @@ export const removeBusiness = createAsyncThunk("business/delete", async (busines
     await businessService.deleteBusiness(businessId);
     return businessId;
   } catch (error) {
-    return rejectWithValue(error.response?.data?.message || "Failed to delete business");
+    return rejectWithValue(error.response?.data || { message: "Failed to delete business" });
   }
 });
 

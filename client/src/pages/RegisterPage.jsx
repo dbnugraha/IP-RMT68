@@ -6,6 +6,7 @@ import Logo from "../components/Logo";
 import Input from "../components/Input";
 import BrandingPanel from "../components/BrandingPanel";
 import AlertMessage from "../components/AlertMessage";
+import { extractFieldErrors, getMainErrorMessage } from "../helpers/errorHelpers";
 
 export default function RegisterPage() {
   const dispatch = useDispatch();
@@ -19,6 +20,7 @@ export default function RegisterPage() {
   });
 
   const [validationErrors, setValidationErrors] = useState({});
+  const [serverErrors, setServerErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState("");
 
   const handleInputChange = (e) => {
@@ -30,6 +32,13 @@ export default function RegisterPage() {
     if (validationErrors[e.target.name]) {
       setValidationErrors({
         ...validationErrors,
+        [e.target.name]: "",
+      });
+    }
+    // Clear server error for this field
+    if (serverErrors[e.target.name]) {
+      setServerErrors({
+        ...serverErrors,
         [e.target.name]: "",
       });
     }
@@ -95,6 +104,15 @@ export default function RegisterPage() {
     }
   }, [isAuthenticated, navigate]);
 
+  // Extract server field errors when error changes
+  useEffect(() => {
+    if (error) {
+      setServerErrors(extractFieldErrors(error));
+    } else {
+      setServerErrors({});
+    }
+  }, [error]);
+
   useEffect(() => {
     return () => {
       dispatch(clearError());
@@ -124,8 +142,8 @@ export default function RegisterPage() {
             {/* Success Message */}
             <AlertMessage type="success" message={successMessage} />
 
-            {/* Error Message */}
-            <AlertMessage type="error" message={error} />
+            {/* Error Message - Only show if there's a general error (not field-specific) */}
+            <AlertMessage type="error" message={getMainErrorMessage(error)} />
 
             {/* Registration Form */}
             <form onSubmit={handleRegister} className="space-y-5">
@@ -138,7 +156,7 @@ export default function RegisterPage() {
                 onChange={handleInputChange}
                 placeholder="you@example.com"
                 disabled={loading}
-                error={validationErrors.email}
+                error={validationErrors.email || serverErrors.email}
               />
 
               <Input
@@ -150,7 +168,7 @@ export default function RegisterPage() {
                 onChange={handleInputChange}
                 placeholder="••••••••"
                 disabled={loading}
-                error={validationErrors.password}
+                error={validationErrors.password || serverErrors.password}
               />
 
               <Input

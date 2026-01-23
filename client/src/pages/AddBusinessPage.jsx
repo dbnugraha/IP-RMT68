@@ -4,13 +4,14 @@ import { useNavigate } from "react-router";
 import { createNewBusiness, clearError } from "../store/businessSlice";
 import Navbar from "../components/Navbar";
 import BusinessForm from "../components/BusinessForm";
+import AlertMessage from "../components/AlertMessage";
+import { extractFieldErrors, getMainErrorMessage } from "../helpers/errorHelpers";
 
 export default function AddBusinessPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading, error, businesses } = useSelector((state) => state.business);
   const { isAuthenticated } = useSelector((state) => state.auth);
-  console.log(error);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -19,6 +20,8 @@ export default function AddBusinessPage() {
     description: "",
     address: "",
   });
+
+  const [fieldErrors, setFieldErrors] = useState({});
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -37,6 +40,15 @@ export default function AddBusinessPage() {
       dispatch(clearError());
     };
   }, [dispatch]);
+
+  // Extract field errors when error changes
+  useEffect(() => {
+    if (error) {
+      setFieldErrors(extractFieldErrors(error));
+    } else {
+      setFieldErrors({});
+    }
+  }, [error]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -72,12 +84,15 @@ export default function AddBusinessPage() {
 
         {/* Form Card */}
         <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
+          {/* Error Message - Only show if there's a general error (not field-specific) */}
+          <AlertMessage type="error" message={getMainErrorMessage(error)} className="mb-6" />
+
           <BusinessForm
             formData={formData}
             setFormData={setFormData}
             onSubmit={handleSubmit}
             loading={loading}
-            error={error}
+            errors={fieldErrors}
           />
         </div>
 

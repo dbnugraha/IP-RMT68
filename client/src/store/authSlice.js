@@ -7,7 +7,7 @@ export const loginWithGoogle = createAsyncThunk("auth/googleLogin", async (crede
     const data = await authService.googleLogin(credential);
     return data;
   } catch (error) {
-    return rejectWithValue(error.response?.data?.message || "Login failed");
+    return rejectWithValue(error.response?.data || { message: "Login failed" });
   }
 });
 
@@ -16,7 +16,8 @@ export const loginWithEmail = createAsyncThunk("auth/emailLogin", async ({ email
     const data = await authService.login(email, password);
     return data;
   } catch (error) {
-    return rejectWithValue(error.response?.data?.message || "Login failed");
+    // If 400 error, error.response.data returns { message: "...", details: [{field: "...", message: "..."}, ...]}
+    return rejectWithValue(error.response?.data || { message: "Login failed" });
   }
 });
 
@@ -25,7 +26,7 @@ export const registerUser = createAsyncThunk("auth/register", async ({ email, pa
     const data = await authService.register(email, password);
     return data;
   } catch (error) {
-    return rejectWithValue(error.response?.data?.message || "Registration failed");
+    return rejectWithValue(error.response?.data || { message: "Registration failed" });
   }
 });
 

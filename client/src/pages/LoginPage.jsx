@@ -8,6 +8,7 @@ import Input from "../components/Input";
 import BrandingPanel from "../components/BrandingPanel";
 import FormDivider from "../components/FormDivider";
 import AlertMessage from "../components/AlertMessage";
+import { extractFieldErrors, getMainErrorMessage } from "../helpers/errorHelpers";
 
 export default function LoginPage() {
   const dispatch = useDispatch();
@@ -18,6 +19,8 @@ export default function LoginPage() {
     email: "",
     password: "",
   });
+
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const handleCredentialResponse = useCallback(
     async (response) => {
@@ -38,6 +41,13 @@ export default function LoginPage() {
       ...formData,
       [e.target.name]: e.target.value,
     });
+    // Clear field error when user types
+    if (fieldErrors[e.target.name]) {
+      setFieldErrors({
+        ...fieldErrors,
+        [e.target.name]: "",
+      });
+    }
   };
 
   const handleEmailLogin = async (e) => {
@@ -51,6 +61,15 @@ export default function LoginPage() {
       console.error("Email login failed:", error);
     }
   };
+
+  // Extract field errors when error changes
+  useEffect(() => {
+    if (error) {
+      setFieldErrors(extractFieldErrors(error));
+    } else {
+      setFieldErrors({});
+    }
+  }, [error]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -99,8 +118,8 @@ export default function LoginPage() {
               <p className="text-gray-600">Sign in to access your account</p>
             </div>
 
-            {/* Error Message */}
-            <AlertMessage type="error" message={error} />
+            {/* Error Message - Only show if there's a general error (not field-specific) */}
+            <AlertMessage type="error" message={getMainErrorMessage(error)} />
 
             {/* Email Login Form */}
             <form onSubmit={handleEmailLogin} className="space-y-5">
@@ -112,8 +131,8 @@ export default function LoginPage() {
                 value={formData.email}
                 onChange={handleInputChange}
                 placeholder="you@example.com"
-                required
                 disabled={loading}
+                error={fieldErrors.email}
               />
 
               <Input
@@ -124,8 +143,8 @@ export default function LoginPage() {
                 value={formData.password}
                 onChange={handleInputChange}
                 placeholder="••••••••"
-                required
                 disabled={loading}
+                error={fieldErrors.password}
               />
 
               <button

@@ -16,6 +16,7 @@ export default function BusinessForm({
   onSubmit,
   loading,
   submitButtonText = "Create Business",
+  errors = {},
 }) {
   const handleInputChange = (e) => {
     setFormData({
@@ -35,6 +36,7 @@ export default function BusinessForm({
         onChange={handleInputChange}
         placeholder="My Warung"
         disabled={loading}
+        error={errors.name}
       />
 
       <div>
@@ -47,7 +49,9 @@ export default function BusinessForm({
           value={formData.type}
           onChange={handleInputChange}
           disabled={loading}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white text-gray-900"
+          className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white text-gray-900 ${
+            errors.type ? "border-red-500" : "border-gray-300"
+          }`}
         >
           <option value="">Select a type</option>
           {BUSINESS_TYPES.map((type) => (
@@ -56,6 +60,7 @@ export default function BusinessForm({
             </option>
           ))}
         </select>
+        {errors.type && <p className="mt-1 text-sm text-red-600">{errors.type}</p>}
       </div>
 
       <Input
@@ -67,6 +72,7 @@ export default function BusinessForm({
         onChange={handleInputChange}
         placeholder="https://example.com/image.jpg"
         disabled={loading}
+        error={errors.imageUrl}
       />
 
       <div>
@@ -81,8 +87,11 @@ export default function BusinessForm({
           placeholder="Tell us about your business..."
           disabled={loading}
           rows={4}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white text-gray-900 resize-none"
+          className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white text-gray-900 resize-none ${
+            errors.description ? "border-red-500" : "border-gray-300"
+          }`}
         />
+        {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description}</p>}
       </div>
 
       <Input
@@ -94,6 +103,7 @@ export default function BusinessForm({
         onChange={handleInputChange}
         placeholder="123 Main St, City, Country"
         disabled={loading}
+        error={errors.address}
       />
 
       <button

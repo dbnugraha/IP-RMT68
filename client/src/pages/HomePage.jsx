@@ -22,9 +22,7 @@ export default function HomePage() {
       return;
     }
 
-    // Clear selected business when on homepage
     dispatch(selectBusiness(null));
-    // Clear all business-specific state
     dispatch(clearTransactions());
     dispatch(clearInsights());
     dispatch(clearAnalytics());

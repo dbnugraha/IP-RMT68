@@ -4,13 +4,15 @@ import { useNavigate, useParams } from "react-router";
 import { fetchBusinessById, updateExistingBusiness, clearError } from "../store/businessSlice";
 import Navbar from "../components/Navbar";
 import BusinessForm from "../components/BusinessForm";
+import AlertMessage from "../components/AlertMessage";
+import { extractFieldErrors, getMainErrorMessage } from "../helpers/errorHelpers";
 import Swal from "sweetalert2";
 
 export default function EditBusinessPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { businessId } = useParams();
-  const { loading, selectedBusiness } = useSelector((state) => state.business);
+  const { loading, selectedBusiness, error } = useSelector((state) => state.business);
   const { isAuthenticated } = useSelector((state) => state.auth);
 
   const [formData, setFormData] = useState({
@@ -20,6 +22,8 @@ export default function EditBusinessPage() {
     description: "",
     address: "",
   });
+
+  const [fieldErrors, setFieldErrors] = useState({});
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -52,6 +56,15 @@ export default function EditBusinessPage() {
       dispatch(clearError());
     };
   }, [dispatch]);
+
+  // Extract field errors when error changes
+  useEffect(() => {
+    if (error) {
+      setFieldErrors(extractFieldErrors(error));
+    } else {
+      setFieldErrors({});
+    }
+  }, [error]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -112,12 +125,16 @@ export default function EditBusinessPage() {
 
         {/* Form Card */}
         <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
+          {/* Error Message - Only show if there's a general error (not field-specific) */}
+          <AlertMessage type="error" message={getMainErrorMessage(error)} className="mb-6" />
+
           <BusinessForm
             formData={formData}
             setFormData={setFormData}
             onSubmit={handleSubmit}
             loading={loading}
             submitButtonText="Update Business"
+            errors={fieldErrors}
           />
         </div>
 

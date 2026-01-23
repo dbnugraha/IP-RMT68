@@ -10,5 +10,23 @@ export default function AlertMessage({ type = "error", message, className = "" }
 
   if (!message) return null;
 
-  return <div className={`mb-6 p-4 border rounded-lg text-sm ${variants[type]} ${className}`}>{message}</div>;
+  // Handle both string messages and error objects with details
+  const isErrorObject = typeof message === "object" && message !== null;
+  const mainMessage = isErrorObject ? message.message : message;
+  const details = isErrorObject ? message.details : null;
+
+  return (
+    <div className={`mb-6 p-4 border rounded-lg text-sm ${variants[type]} ${className}`}>
+      <p className="font-medium">{mainMessage}</p>
+      {details && details.length > 0 && (
+        <ul className="mt-2 ml-4 list-disc space-y-1">
+          {details.map((detail, index) => (
+            <li key={index}>
+              <span className="font-medium">{detail.field}:</span> {detail.message}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
 }
