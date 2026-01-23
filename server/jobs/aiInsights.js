@@ -60,9 +60,9 @@ async function generateAndSendInsights(insightType = "daily", sendEmail = false)
  * Skips first day of month and Mondays (when weekly/monthly run)
  */
 const scheduleDailyInsights = (skipMonthly = true, skipWeekly = true) => {
-  // Schedule: Every day at 7:00 AM (Asia/Jakarta timezone)
+  // Schedule: Every day at 12:00 PM (Asia/Jakarta timezone)
   cron.schedule(
-    "0 7 * * *",
+    "0 12 * * *",
     async () => {
       const today = new Date();
       const dayOfMonth = today.getDate();
@@ -93,7 +93,7 @@ const scheduleDailyInsights = (skipMonthly = true, skipWeekly = true) => {
     },
   );
 
-  console.log("✅ Daily AI Insights job scheduled (every day at 7:00 AM, except Mondays and 1st of month)");
+  console.log("✅ Daily AI Insights job scheduled (every day at 12:00 PM, except Mondays and 1st of month)");
 };
 
 /**

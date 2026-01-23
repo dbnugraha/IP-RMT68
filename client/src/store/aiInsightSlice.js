@@ -70,6 +70,12 @@ const aiInsightSlice = createSlice({
     clearError(state) {
       state.error = null;
     },
+
+    clearInsights(state) {
+      state.latestInsight = null;
+      state.latestSummary = null;
+      state.error = null;
+    },
   },
   extraReducers: (builder) => {
     // Fetch latest summary
@@ -85,7 +91,14 @@ const aiInsightSlice = createSlice({
       })
       .addCase(fetchLatestSummary.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        // Don't set error if it's just "no insights found" (404)
+        if (
+          action.payload &&
+          !action.payload.includes("No insights available") &&
+          !action.payload.includes("not found")
+        ) {
+          state.error = action.payload;
+        }
       });
 
     // Fetch latest insight
@@ -101,7 +114,14 @@ const aiInsightSlice = createSlice({
       })
       .addCase(fetchLatestInsight.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        // Don't set error if it's just "no insights found" (404)
+        if (
+          action.payload &&
+          !action.payload.includes("No insights available") &&
+          !action.payload.includes("not found")
+        ) {
+          state.error = action.payload;
+        }
       });
 
     // Generate insight
@@ -154,6 +174,6 @@ const aiInsightSlice = createSlice({
   },
 });
 
-export const { clearError } = aiInsightSlice.actions;
+export const { clearError, clearInsights } = aiInsightSlice.actions;
 
 export default aiInsightSlice.reducer;

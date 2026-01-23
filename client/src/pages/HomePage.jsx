@@ -1,7 +1,10 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
-import { fetchMyBusinesses, removeBusiness } from "../store/businessSlice";
+import { fetchMyBusinesses, removeBusiness, selectBusiness } from "../store/businessSlice";
+import { clearTransactions } from "../store/transactionSlice";
+import { clearInsights } from "../store/aiInsightSlice";
+import { clearAnalytics } from "../store/analyticsSlice";
 import Navbar from "../components/Navbar";
 import BusinessCard from "../components/BusinessCard";
 import AlertMessage from "../components/AlertMessage";
@@ -19,6 +22,12 @@ export default function HomePage() {
       return;
     }
 
+    // Clear selected business when on homepage
+    dispatch(selectBusiness(null));
+    // Clear all business-specific state
+    dispatch(clearTransactions());
+    dispatch(clearInsights());
+    dispatch(clearAnalytics());
     dispatch(fetchMyBusinesses());
   }, [dispatch, isAuthenticated, navigate]);
 

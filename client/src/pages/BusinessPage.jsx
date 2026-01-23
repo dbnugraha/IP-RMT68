@@ -32,6 +32,7 @@ export default function BusinessPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [randomIndex, setRandomIndex] = useState(() => null);
+  const [hasAttemptedGeneration, setHasAttemptedGeneration] = useState(false);
 
   const { selectedBusiness, loading: businessLoading } = useSelector((state) => state.business);
   const {
@@ -65,6 +66,7 @@ export default function BusinessPage() {
   const handleGenerateInsights = async () => {
     if (businessId) {
       setEmailSent(false); // Reset email sent status when generating new insights
+      setHasAttemptedGeneration(true); // Track that user attempted generation
       await dispatch(generateInsight({ businessId, params: { type: "daily" } }));
       // Refresh the latest summary after generation
       dispatch(fetchLatestSummary(businessId));
@@ -87,6 +89,7 @@ export default function BusinessPage() {
     }
 
     if (businessId) {
+      setHasAttemptedGeneration(false); // Reset on business change
       dispatch(fetchBusinessById(businessId));
       dispatch(fetchLatestSummary(businessId));
       dispatch(fetchDashboard(businessId));
@@ -143,7 +146,7 @@ export default function BusinessPage() {
             onSendEmail={handleSendEmail}
             isGenerating={generating}
             isSendingEmail={sendingEmail}
-            error={aiError}
+            error={hasAttemptedGeneration ? aiError : null}
             emailSent={emailSent}
           />
 

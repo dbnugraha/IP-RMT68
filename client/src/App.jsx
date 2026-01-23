@@ -10,6 +10,7 @@ import BusinessPage from "./pages/BusinessPage";
 import AddBusinessPage from "./pages/AddBusinessPage";
 import EditBusinessPage from "./pages/EditBusinessPage";
 import ProductsPage from "./pages/ProductsPage";
+import TransactionsPage from "./pages/TransactionsPage";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
           <Route path="/business/:businessId" element={<BusinessPage />} />
           <Route path="/business/:businessId/edit" element={<EditBusinessPage />} />
           <Route path="/business/:businessId/products" element={<ProductsPage />} />
+          <Route path="/business/:businessId/transactions" element={<TransactionsPage />} />
         </Route>
       </Routes>
     </ErrorBoundary>

@@ -87,6 +87,14 @@ const transactionSlice = createSlice({
     clearError(state) {
       state.error = null;
     },
+
+    // Clear all transactions
+    clearTransactions(state) {
+      state.transactions = [];
+      state.stats = null;
+      state.selectedTransaction = null;
+      state.error = null;
+    },
   },
   extraReducers: (builder) => {
     // Fetch all transactions
@@ -196,6 +204,6 @@ const transactionSlice = createSlice({
   },
 });
 
-export const { selectTransaction, clearError } = transactionSlice.actions;
+export const { selectTransaction, clearError, clearTransactions } = transactionSlice.actions;
 
 export default transactionSlice.reducer;

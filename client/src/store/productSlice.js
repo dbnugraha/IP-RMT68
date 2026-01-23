@@ -63,19 +63,19 @@ export const softRemoveProduct = createAsyncThunk(
   "product/softDelete",
   async ({ businessId, productId }, { rejectWithValue }) => {
     try {
-      const data = await productService.softDeleteProduct(businessId, productId);
-      return data;
+      const data = await productService.deleteProduct(businessId, productId);
+      return { productId, data };
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || "Failed to soft delete product");
+      return rejectWithValue(error.response?.data?.message || "Failed to delete product");
     }
   },
 );
 
 export const restockProductStock = createAsyncThunk(
   "product/restock",
-  async ({ businessId, productId, quantity }, { rejectWithValue }) => {
+  async ({ businessId, productId, quantity, generateTransaction }, { rejectWithValue }) => {
     try {
-      const data = await productService.restockProduct(businessId, productId, quantity);
+      const data = await productService.restockProduct(businessId, productId, quantity, generateTransaction);
       return data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || "Failed to restock product");
@@ -85,9 +85,9 @@ export const restockProductStock = createAsyncThunk(
 
 export const deductStock = createAsyncThunk(
   "product/deductStock",
-  async ({ businessId, productId, quantity }, { rejectWithValue }) => {
+  async ({ businessId, productId, quantity, generateTransaction }, { rejectWithValue }) => {
     try {
-      const data = await productService.deductProductStock(businessId, productId, quantity);
+      const data = await productService.deductProductStock(businessId, productId, quantity, generateTransaction);
       return data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || "Failed to deduct stock");
@@ -224,9 +224,16 @@ const productSlice = createSlice({
       })
       .addCase(softRemoveProduct.fulfilled, (state, action) => {
         state.loading = false;
-        const index = state.products.findIndex((p) => p.id === action.payload.id);
-        if (index !== -1) {
-          state.products[index] = action.payload;
+        const { productId, data } = action.payload;
+        // If soft deleted, mark as deleted. If hard deleted, remove from array
+        if (data.deletedType === "soft" && data.product) {
+          const index = state.products.findIndex((p) => p.id === data.product.id);
+          if (index !== -1) {
+            state.products[index] = data.product;
+          }
+        } else {
+          // Hard delete - remove from state
+          state.products = state.products.filter((p) => p.id !== productId);
         }
         state.error = null;
       })

@@ -175,7 +175,14 @@ export default function ProductsPage() {
 
     if (formValues) {
       try {
-        await dispatch(restockProductStock({ businessId, productId, quantity: formValues.quantity })).unwrap();
+        await dispatch(
+          restockProductStock({
+            businessId,
+            productId,
+            quantity: formValues.quantity,
+            generateTransaction: formValues.createTransaction,
+          }),
+        ).unwrap();
 
         Swal.fire({
           title: "Success!",
@@ -237,7 +244,14 @@ export default function ProductsPage() {
 
     if (formValues) {
       try {
-        await dispatch(deductStock({ businessId, productId, quantity: formValues.quantity })).unwrap();
+        await dispatch(
+          deductStock({
+            businessId,
+            productId,
+            quantity: formValues.quantity,
+            generateTransaction: formValues.createTransaction,
+          }),
+        ).unwrap();
 
         Swal.fire({
           title: "Success!",

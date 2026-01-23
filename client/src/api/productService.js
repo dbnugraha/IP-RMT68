@@ -49,22 +49,24 @@ export const fetchProductById = async (businessId, productId) => {
 
 /**
  * Increase product stock
- * @returns { id, name, stock, message }
+ * @returns { product, transactionGenerated }
  */
-export const restockProduct = async (businessId, productId, quantity) => {
+export const restockProduct = async (businessId, productId, quantity, generateTransaction = false) => {
   const { data } = await http.patch(`${BUSINESS_SERVICE_URL}/${businessId}/products/${productId}/restock`, {
     quantity,
+    generateTransaction,
   });
   return data;
 };
 
 /**
  * Decrease product stock
- * @returns { id, name, stock, message }
+ * @returns { product, transactionGenerated }
  */
-export const deductProductStock = async (businessId, productId, quantity) => {
+export const deductProductStock = async (businessId, productId, quantity, generateTransaction = false) => {
   const { data } = await http.patch(`${BUSINESS_SERVICE_URL}/${businessId}/products/${productId}/deduct-stock`, {
     quantity,
+    generateTransaction,
   });
   return data;
 };
