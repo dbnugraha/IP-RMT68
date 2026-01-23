@@ -21,12 +21,15 @@ module.exports = {
       },
       type: {
         type: Sequelize.ENUM("income", "expense"),
+        allowNull: false,
       },
       totalAmount: {
         type: Sequelize.FLOAT,
+        allowNull: false,
       },
       paymentMethod: {
         type: Sequelize.ENUM("cash", "credit_card", "e_wallet"),
+        allowNull: false,
       },
       notes: {
         type: Sequelize.TEXT,
