@@ -1,0 +1,225 @@
+// server/seeders/20260121010100-seed-transactions.js
+"use strict";
+
+/** @type {import('sequelize-cli').Migration} */
+module.exports = {
+  async up(queryInterface, Sequelize) {
+    await queryInterface.bulkInsert(
+      "Transactions",
+      [
+        // Transactions for TechnoCore Solutions (BusinessId: 1)
+        {
+          BusinessId: 1,
+          type: "income",
+          totalAmount: 8000000,
+          paymentMethod: "credit_card",
+          notes: "Website development project for PT. Maju Jaya - initial payment",
+          createdAt: new Date("2026-01-15"),
+          updatedAt: new Date("2026-01-15"),
+        },
+        {
+          BusinessId: 1,
+          type: "income",
+          totalAmount: 25000000,
+          paymentMethod: "credit_card",
+          notes: "Mobile app development for e-commerce startup - full payment",
+          createdAt: new Date("2026-01-18"),
+          updatedAt: new Date("2026-01-18"),
+        },
+        {
+          BusinessId: 1,
+          type: "expense",
+          totalAmount: 5000000,
+          paymentMethod: "cash",
+          notes: "Office equipment purchase - laptops and monitors",
+          createdAt: new Date("2026-01-10"),
+          updatedAt: new Date("2026-01-10"),
+        },
+        {
+          BusinessId: 1,
+          type: "expense",
+          totalAmount: 2000000,
+          paymentMethod: "e_wallet",
+          notes: "Monthly software licenses and cloud services",
+          createdAt: new Date("2026-01-05"),
+          updatedAt: new Date("2026-01-05"),
+        },
+
+        // Transactions for Warung Nasi Tradisional (BusinessId: 2)
+        {
+          BusinessId: 2,
+          type: "income",
+          totalAmount: 1500000,
+          paymentMethod: "cash",
+          notes: "Daily sales - lunch rush hour",
+          createdAt: new Date("2026-01-20"),
+          updatedAt: new Date("2026-01-20"),
+        },
+        {
+          BusinessId: 2,
+          type: "income",
+          totalAmount: 850000,
+          paymentMethod: "e_wallet",
+          notes: "Daily sales - dinner time",
+          createdAt: new Date("2026-01-20"),
+          updatedAt: new Date("2026-01-20"),
+        },
+        {
+          BusinessId: 2,
+          type: "expense",
+          totalAmount: 3000000,
+          paymentMethod: "cash",
+          notes: "Weekly ingredient purchase - meat, vegetables, spices",
+          createdAt: new Date("2026-01-18"),
+          updatedAt: new Date("2026-01-18"),
+        },
+        {
+          BusinessId: 2,
+          type: "expense",
+          totalAmount: 500000,
+          paymentMethod: "cash",
+          notes: "Kitchen equipment repair and maintenance",
+          createdAt: new Date("2026-01-12"),
+          updatedAt: new Date("2026-01-12"),
+        },
+        {
+          BusinessId: 2,
+          type: "income",
+          totalAmount: 2500000,
+          paymentMethod: "credit_card",
+          notes: "Catering order for office event - 50 pax",
+          createdAt: new Date("2026-01-16"),
+          updatedAt: new Date("2026-01-16"),
+        },
+
+        // Transactions for DigitalBoost Marketing (BusinessId: 3)
+        {
+          BusinessId: 3,
+          type: "income",
+          totalAmount: 3500000,
+          paymentMethod: "credit_card",
+          notes: "Social media management - monthly retainer from fashion brand",
+          createdAt: new Date("2026-01-19"),
+          updatedAt: new Date("2026-01-19"),
+        },
+        {
+          BusinessId: 3,
+          type: "income",
+          totalAmount: 5500000,
+          paymentMethod: "e_wallet",
+          notes: "SEO optimization project for online store",
+          createdAt: new Date("2026-01-14"),
+          updatedAt: new Date("2026-01-14"),
+        },
+        {
+          BusinessId: 3,
+          type: "expense",
+          totalAmount: 1500000,
+          paymentMethod: "credit_card",
+          notes: "Paid advertising budget for client campaigns",
+          createdAt: new Date("2026-01-08"),
+          updatedAt: new Date("2026-01-08"),
+        },
+        {
+          BusinessId: 3,
+          type: "expense",
+          totalAmount: 800000,
+          paymentMethod: "e_wallet",
+          notes: "Design software subscriptions - Adobe Creative Cloud",
+          createdAt: new Date("2026-01-03"),
+          updatedAt: new Date("2026-01-03"),
+        },
+
+        // Transactions for Toko Buku Nusantara (BusinessId: 4)
+        {
+          BusinessId: 4,
+          type: "income",
+          totalAmount: 450000,
+          paymentMethod: "cash",
+          notes: "Book sales - morning customers",
+          createdAt: new Date("2026-01-21"),
+          updatedAt: new Date("2026-01-21"),
+        },
+        {
+          BusinessId: 4,
+          type: "income",
+          totalAmount: 1200000,
+          paymentMethod: "e_wallet",
+          notes: "Bulk stationery purchase from school",
+          createdAt: new Date("2026-01-17"),
+          updatedAt: new Date("2026-01-17"),
+        },
+        {
+          BusinessId: 4,
+          type: "expense",
+          totalAmount: 5000000,
+          paymentMethod: "credit_card",
+          notes: "Book inventory restocking - new releases and bestsellers",
+          createdAt: new Date("2026-01-11"),
+          updatedAt: new Date("2026-01-11"),
+        },
+        {
+          BusinessId: 4,
+          type: "expense",
+          totalAmount: 750000,
+          paymentMethod: "cash",
+          notes: "Store rent - monthly payment",
+          createdAt: new Date("2026-01-01"),
+          updatedAt: new Date("2026-01-01"),
+        },
+
+        // Transactions for PT. Sawit Nusantara Jaya (BusinessId: 5)
+        {
+          BusinessId: 5,
+          type: "income",
+          totalAmount: 150000000,
+          paymentMethod: "credit_card",
+          notes: "CPO export to international buyer - 10 tons",
+          createdAt: new Date("2026-01-19"),
+          updatedAt: new Date("2026-01-19"),
+        },
+        {
+          BusinessId: 5,
+          type: "income",
+          totalAmount: 25000000,
+          paymentMethod: "credit_card",
+          notes: "Refined palm oil sales to local distributor - 1000 liters",
+          createdAt: new Date("2026-01-15"),
+          updatedAt: new Date("2026-01-15"),
+        },
+        {
+          BusinessId: 5,
+          type: "expense",
+          totalAmount: 50000000,
+          paymentMethod: "credit_card",
+          notes: "Plantation maintenance and harvesting costs",
+          createdAt: new Date("2026-01-10"),
+          updatedAt: new Date("2026-01-10"),
+        },
+        {
+          BusinessId: 5,
+          type: "expense",
+          totalAmount: 15000000,
+          paymentMethod: "credit_card",
+          notes: "Transportation and logistics - domestic distribution",
+          createdAt: new Date("2026-01-07"),
+          updatedAt: new Date("2026-01-07"),
+        },
+        {
+          BusinessId: 5,
+          type: "expense",
+          totalAmount: 8000000,
+          paymentMethod: "cash",
+          notes: "Factory equipment maintenance and spare parts",
+          createdAt: new Date("2026-01-05"),
+          updatedAt: new Date("2026-01-05"),
+        },
+      ],
+      {},
+    );
+  },
+
+  async down(queryInterface, Sequelize) {
+    await queryInterface.bulkDelete("Transactions", null, {});
+  },
+};

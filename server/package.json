@@ -1,0 +1,44 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "server for individual personal project",
+  "homepage": "https://github.com/dbnugraha/IP-RMT68#readme",
+  "bugs": {
+    "url": "https://github.com/dbnugraha/IP-RMT68/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dbnugraha/IP-RMT68.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "bin/www.js",
+  "scripts": {
+    "test": "jest --runInBand --coverage --detectOpenHandles --forceExit",
+    "dev": "node --watch bin/www.js",
+    "prod": "node bin/www.js",
+    "db:reset": "npx sequelize db:drop && npx sequelize db:create && npx sequelize db:migrate && npx sequelize db:seed:all"
+  },
+  "dependencies": {
+    "@google/genai": "^1.37.0",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dompurify": "^3.3.1",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "google-auth-library": "^10.5.0",
+    "jsdom": "^27.4.0",
+    "jsonwebtoken": "^9.0.3",
+    "marked": "^17.0.1",
+    "node-cron": "^4.2.1",
+    "nodemailer": "^7.0.12",
+    "pg": "^8.17.1",
+    "sequelize": "^6.37.7"
+  },
+  "devDependencies": {
+    "jest": "^30.2.0",
+    "sequelize-cli": "^6.6.5",
+    "supertest": "^7.2.2"
+  }
+}
